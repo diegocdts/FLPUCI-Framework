@@ -35,8 +35,8 @@ class Path:
         return dir_exists_create('{}/f4_entry_exit/'.format(dataset))
 
     @staticmethod
-    def f5_win_entry_exit(dataset: str):
-        return dir_exists_create('{}/f5_win_entry_exit/'.format(dataset))
+    def f5_interval_entry_exit(dataset: str):
+        return dir_exists_create('{}/f5_interval_entry_exit/'.format(dataset))
 
     @staticmethod
     def f6_contact_time(dataset: str):
