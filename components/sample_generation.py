@@ -11,6 +11,11 @@ from inner_types.path import Path
 
 
 def compare_samples_reconstructions(samples, reconstructions):
+    """
+    Compares heatmap samples to their reconstructions
+    :param samples: The list of heatmaps
+    :param reconstructions: The list of reconstructions
+    """
     if len(samples) > 0 and len(reconstructions) > 0:
         plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
 
@@ -33,6 +38,11 @@ def compare_samples_reconstructions(samples, reconstructions):
 
 
 def handle_pixels(pixels: np.array):
+    """
+    Normalizes the heatmap pixels by the min and max values
+    :param pixels: The pixels of a heatmap
+    :return: The normalized pixels of the heatmap
+    """
     if pixels.max() != pixels.min():
         min_value = np.min(pixels)
         max_value = np.max(pixels)
@@ -43,6 +53,11 @@ def handle_pixels(pixels: np.array):
 
 
 def reshape(samples: np.array):
+    """
+    Reshapes the numpy array of samples from 3 to 4 dimensions and from 4 to 5 dimensions
+    :param samples: The numpy array of samples
+    :return: The reshaped numpy array of samples
+    """
     if len(samples.shape) == 4:
         samples = np.reshape(samples, (samples.shape[0], samples.shape[1], samples.shape[2], samples.shape[3], 1))
     elif len(samples.shape) == 3:
@@ -50,7 +65,13 @@ def reshape(samples: np.array):
     return samples
 
 
-def heat_maps_samples_view(samples_list, rows, columns):
+def heat_maps_samples_view(samples, rows, columns):
+    """
+    Shows a matrix of heatmap samples
+    :param samples: The list of samples to show
+    :param rows: Number of rows
+    :param columns: Number of columns
+    """
     plt.figure(figsize=(40, 20))
     for i in range(int(rows * columns)):
         i = int(i)
@@ -59,19 +80,26 @@ def heat_maps_samples_view(samples_list, rows, columns):
         plt.xticks([])
         plt.yticks([])
         plt.grid(False)
-        plt.imshow(samples_list[i])
+        plt.imshow(samples[i])
     plt.show()
 
 
 class SampleHandler:
 
     def __init__(self, dataset: Dataset):
+        """
+        Prepares users samples to be used
+        :param dataset: A Dataset object
+        """
         self.dataset = dataset
         self.f2_data = Path.f2_data(dataset.name)
         self.f3_dm = Path.f3_dm(dataset.name)
         self.set_height_width()
 
     def set_height_width(self):
+        """
+        Sets the height and width attributes of the dataset
+        """
         min_x, min_y = sys.maxsize, sys.maxsize
         max_x, max_y = 0, 0
         for file_name in sorted_files(self.f2_data):
@@ -91,6 +119,12 @@ class SampleHandler:
         self.dataset.set_height_width(float_height, float_width)
 
     def get_datasets(self, start_window: int, end_window: int):
+        """
+        Gets the user datasets of samples inside a window
+        :param start_window: The interval that indicates the start of the window to get samples
+        :param end_window: The interval that indicates the end of the window to get samples
+        :return: The list of user datasets and the indices of users
+        """
         indices = []
         datasets = []
         for index, file_name in enumerate(sorted_files(self.f3_dm)):
@@ -104,6 +138,14 @@ class SampleHandler:
         return datasets, indices
 
     def get_samples(self, file_path: str, start_window: int, end_window: int, add_empty: bool = False):
+        """
+        Gets samples of a user inside a window
+        :param file_path: Path of the displacement matrix
+        :param start_window: The interval that indicates the start of the window to get samples
+        :param end_window: The interval that indicates the end of the window to get samples
+        :param add_empty: Bool flag to add or not empty samples
+        :return: The list of samples
+        """
         samples = []
         with open(file_path) as file:
             intervals = file.readlines()[1:]
@@ -121,6 +163,12 @@ class SampleHandler:
         return reshape(samples)
 
     def samples_as_list(self, start_window: int, end_window: int):
+        """
+        Returns the user datasets of samples as a flat list of samples
+        :param start_window: The interval that indicates the start of the window to get samples
+        :param end_window: The interval that indicates the end of the window to get samples
+        :return: Flat list of samples
+        """
         datasets, indices = self.get_datasets(start_window, end_window)
         samples = []
         for dataset in datasets:
@@ -132,6 +180,10 @@ class SampleHandler:
         return np.array(samples), indices
 
     def random_dataset(self):
+        """
+        Returns a random user dataset of samples
+        :return: The dataset of samples of a random user
+        """
         def get_random():
             total_users = len(sorted_files(self.f3_dm))
             file_name = sorted_files(self.f3_dm)[random.randrange(total_users)]
