@@ -63,7 +63,6 @@ def heat_maps_samples_view(samples_list, rows, columns):
     plt.show()
 
 
-
 class SampleHandler:
 
     def __init__(self, dataset: Dataset):
