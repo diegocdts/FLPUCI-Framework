@@ -209,14 +209,8 @@ class DisplacementMatrix:
         cell_stay_time = np.zeros(len(self.columns))
         time_in_trace = 0
 
-        if self.dataset.paddingYX[0]:
-            y_padding = 1
-        else:
-            y_padding = 0
-        if self.dataset.paddingYX[1]:
-            x_padding = 1
-        else:
-            x_padding = 0
+        y_padding = 1 if self.dataset.paddingYX[0] else 0
+        x_padding = 1 if self.dataset.paddingYX[1] else 0
         if len(df_interval) > 0:
             min_in_trace = max_in_trace = previous_time = df_interval.time[0] - 1
 
