@@ -1,0 +1,12 @@
+tensorflow==2.13.0
+tensorrt
+tensorflow-federated
+traci
+sumolib
+nest_asyncio
+seaborn
+matplotlib
+scikit-image
+scikit-learn
+scipy
+utm
