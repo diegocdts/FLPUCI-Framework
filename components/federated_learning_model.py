@@ -21,22 +21,22 @@ def create_state_manager_dir(dir_path: str):
 
 class FederatedDataHandler:
 
-    def __init__(self, dataset: Dataset, training_parameters: TrainingParameters):
+    def __init__(self, dataset: Dataset, parameters: TrainingParameters):
         self.sample_handler = SampleHandler(dataset=dataset)
-        self.training_parameters = training_parameters
+        self.parameters = parameters
         self.element_spec = self.element_spec_build()
 
     def preprocess(self, dataset):
 
-        batch_size = self.training_parameters.batch_size
+        batch_size = self.parameters.batch_size
         if len(dataset) < batch_size:
             batch_size = len(dataset)
 
         def batch_format_fn(element):
             return collections.OrderedDict(x=element, y=element)
 
-        return dataset.repeat(self.training_parameters.epochs).shuffle(self.training_parameters.shuffle_buffer).batch(
-            batch_size).map(batch_format_fn).prefetch(self.training_parameters.prefetch_buffer)
+        return dataset.repeat(self.parameters.epochs).shuffle(self.parameters.shuffle_buffer).batch(
+            batch_size).map(batch_format_fn).prefetch(self.parameters.prefetch_buffer)
 
     def element_spec_build(self):
         single_user_dataset = tf.data.Dataset.from_tensor_slices(self.sample_handler.random_dataset())
@@ -59,12 +59,12 @@ class FederatedDataHandler:
 
 class FederatedFullConvolutionalAutoEncoder:
 
-    def __init__(self, federated_data_handler: FederatedDataHandler, properties: FCAEProperties):
+    def __init__(self, dataset: Dataset, parameters: TrainingParameters, properties: FCAEProperties):
         self.properties = properties
-        self.federated_data_handler = federated_data_handler
+        self.federated_data_handler = FederatedDataHandler(dataset, parameters)
         self.iterative_process, self.state = self.global_model_start()
         self.evaluator = self.build_evaluator()
-        self.dataset_name = federated_data_handler.sample_handler.dataset.name
+        self.dataset_name = self.federated_data_handler.sample_handler.dataset.name
         self.f9_checkpoint = Path.f8_checkpoints(self.dataset_name, LearningApproach.FED)
         self.state_manager = None
 
@@ -106,7 +106,7 @@ class FederatedFullConvolutionalAutoEncoder:
 
     def training(self, start_window: int, end_window: int):
         loop = asyncio.get_event_loop()
-        rounds = self.federated_data_handler.training_parameters.rounds
+        rounds = self.federated_data_handler.parameters.rounds
         path = get_file_path(self.f9_checkpoint, start_end_window_dir(start_window, end_window))
         self.init_state_manager(path, rounds)
         next_round = self.get_next_round(loop)
