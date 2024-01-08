@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from components.sample_generation import SampleHandler
-from inner_functions.path import get_file_path, sorted_files, interval_csv, path_exists, metric_interval_csv, \
+from inner_functions.path import get_file_path, sorted_files, interval_csv, path_exists, metric_interval_json, \
     interval_json
 from inner_types.data import Dataset
 from inner_types.path import Path
@@ -25,13 +25,24 @@ def discrete_pixels(pixels: np.array):
     return pixels
 
 
-def add_contact_time(dictionary, tuple_of_users, contact_time_value):
+def add_dictionary_entry(dictionary, tuple_of_users, value):
+    """
+    Adds a new entry in a provided dictionary
+    :param dictionary: A dictionary where the keys are tuples of user indices
+    :param tuple_of_users: A tuple of user indices
+    :param value: The value to be added
+    """
     if dictionary.get(tuple_of_users) is not None:
-        contact_time_value = dictionary.get(tuple_of_users) + contact_time_value
-    dictionary[tuple_of_users] = contact_time_value
+        value = dictionary.get(tuple_of_users) + value
+    dictionary[tuple_of_users] = value
 
 
-def export_contact_time(dictionary, output_file_path):
+def export_dictionary(dictionary, output_file_path):
+    """
+    Exports a provided dictionary to a json file
+    :param dictionary: A dictionary to export
+    :param output_file_path: The path of the file
+    """
     with open(output_file_path, 'w') as json_file:
         json.dump(dictionary, json_file)
 
@@ -56,7 +67,7 @@ class BaselineComputation:
 
     def get_last_intervals(self):
         """
-        Gets the last interval in the trace as a index
+        Gets the last interval in the trace as an index
         :return: The last interval index
         """
         root = Path.f3_dm(self.dataset.name)
@@ -162,11 +173,11 @@ class BaselineComputation:
                         id_j = series_j.id
                         first_exit = min(series_i.exit, series_j.exit)
                         contact_time_value = first_exit - series_j.entry
-                        add_contact_time(contact_times, (id_i, id_j), contact_time_value)
-                        add_contact_time(contact_times, (id_j, id_i), contact_time_value)
+                        add_dictionary_entry(contact_times, (id_i, id_j), contact_time_value)
+                        add_dictionary_entry(contact_times, (id_j, id_i), contact_time_value)
                     del aux_df
                 del file_df
-                export_contact_time(contact_times, output_file_path)
+                export_dictionary(contact_times, output_file_path)
 
     def image_metrics(self):
         """
@@ -176,9 +187,9 @@ class BaselineComputation:
 
         for interval in range(self.last_interval):
 
-            mse_output_path = get_file_path(self.f7_metrics, metric_interval_csv(ImageMetric.MSE, interval))
-            ssim_output_path = get_file_path(self.f7_metrics, metric_interval_csv(ImageMetric.SSIM, interval))
-            ari_output_path = get_file_path(self.f7_metrics, metric_interval_csv(ImageMetric.ARI, interval))
+            mse_output_path = get_file_path(self.f7_metrics, metric_interval_json(ImageMetric.MSE, interval))
+            ssim_output_path = get_file_path(self.f7_metrics, metric_interval_json(ImageMetric.SSIM, interval))
+            ari_output_path = get_file_path(self.f7_metrics, metric_interval_json(ImageMetric.ARI, interval))
 
             if not path_exists(mse_output_path):
                 print(' > image_metrics:', interval)
@@ -195,9 +206,9 @@ class BaselineComputation:
                 total_samples = len(samples)
                 if total_samples > 0:
 
-                    mse = np.zeros(shape=(total_samples, total_samples))
-                    ssim = np.zeros(shape=(total_samples, total_samples))
-                    ari = np.zeros(shape=(total_samples, total_samples))
+                    mse = {}
+                    ssim = {}
+                    ari = {}
 
                     for index_i, image_i in enumerate(samples):
                         image_i = np.squeeze(image_i)
@@ -208,18 +219,23 @@ class BaselineComputation:
                             if index_i == index_j:
                                 continue
 
-                            mse[index_i, index_j] = f_mse(image_i, image_j)
+                            mse_value = f_mse(image_i, image_j)
+                            add_dictionary_entry(mse, (index_i, index_j), mse_value)
+                            add_dictionary_entry(mse, (index_j, index_i), mse_value)
+
                             data_range = max(image_i.max(), image_j.max()) - min(image_i.min(), image_j.min())
-                            ssim[index_i, index_j] = f_ssim(image_i, image_j, win_size=win_size, data_range=data_range)
-                            ari[index_i, index_j] = f_ari(
+                            ssim_value = f_ssim(image_i, image_j, win_size=win_size, data_range=data_range)
+                            add_dictionary_entry(ssim, (index_i, index_j), ssim_value)
+                            add_dictionary_entry(ssim, (index_j, index_i), ssim_value)
+
+                            ari_value = f_ari(
                                 discrete_pixels(image_i.reshape(self.dataset.width * self.dataset.height)),
                                 discrete_pixels(image_j.reshape(self.dataset.width * self.dataset.height)))
-                    mse_df = pd.DataFrame(mse)
-                    mse_df.to_csv(mse_output_path, index=False)
-                    ssim_df = pd.DataFrame(ssim)
-                    ssim_df.to_csv(ssim_output_path, index=False)
-                    ari_df = pd.DataFrame(ari)
-                    ari_df.to_csv(ari_output_path, index=False)
+                            add_dictionary_entry(ari, (index_i, index_j), ari_value)
+                            add_dictionary_entry(ari, (index_j, index_i), ari_value)
+                    export_dictionary(mse, mse_output_path)
+                    export_dictionary(ssim, ssim_output_path)
+                    export_dictionary(ari, ari_output_path)
 
 
 def compute_baseline(dataset: Dataset):

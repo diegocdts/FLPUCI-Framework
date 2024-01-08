@@ -23,5 +23,9 @@ def metric_interval_csv(metric: ImageMetric, interval: int):
     return '{}_interval_{}.csv'.format(metric.value, interval)
 
 
+def metric_interval_json(metric: ImageMetric, interval: int):
+    return '{}_interval_{}.json'.format(metric.value, interval)
+
+
 def path_exists(path: str):
     return os.path.exists(path)
