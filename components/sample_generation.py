@@ -131,7 +131,6 @@ class SampleHandler:
             file_path = get_file_path(self.f3_dm, file_name)
             user_samples = self.get_samples(file_path, start_window, end_window)
             if len(user_samples) > 0:
-                dataset_id = file_name.replace('.csv', '')
                 indices.append(index)
                 datasets.append(user_samples)
             del user_samples
