@@ -1,6 +1,6 @@
 import os
 
-from inner_types.learning import LearningApproach, WindowStrategy
+from inner_types.learning import LearningApproach, WindowStrategyType
 
 root_dir = os.path.join(os.path.normpath(os.getcwd() + os.sep + os.pardir), 'FLPUCI-Datasets/')
 
@@ -51,8 +51,8 @@ class Path:
         return dir_exists_create('{}/f8_checkpoints/{}/'.format(dataset, approach.value))
 
     @staticmethod
-    def f9_results(dataset: str, approach: LearningApproach, strategy: WindowStrategy):
-        return dir_exists_create('{}/f9_results/{}/{}/'.format(dataset, approach.value, strategy))
+    def f9_results(dataset: str, approach: LearningApproach, strategy_type: WindowStrategyType):
+        return dir_exists_create('{}/f9_results/{}/{}/'.format(dataset, approach.value, strategy_type))
 
     @staticmethod
     def f9_results_match(dataset: str, approach: LearningApproach):
