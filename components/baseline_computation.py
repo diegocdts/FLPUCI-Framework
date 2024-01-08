@@ -244,7 +244,7 @@ def compute_baseline(dataset: Dataset):
     :param dataset: The Dataset object
     """
     baseline = BaselineComputation(dataset)
-    #baseline.cell_entry_exit()
-    #baseline.interval_entry_exit()
+    baseline.cell_entry_exit()
+    baseline.interval_entry_exit()
     baseline.contact_time()
     baseline.image_metrics()
