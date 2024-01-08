@@ -9,12 +9,34 @@ class LearningApproach(Enum):
         return str(self.value)
 
 
-class WindowStrategy(Enum):
+class WindowStrategyType(Enum):
     ACC = 'ACC'
     SLI = 'SLI'
 
     def __str__(self):
         return str(self.value)
+
+
+class WindowStrategy:
+
+    def __init__(self,
+                 strategy_type: WindowStrategyType,
+                 window_size: int):
+        self.type = strategy_type
+        self.size = window_size
+
+    def set_window_size(self, window_size):
+        self.size = window_size
+
+    def get_start_window(self, end_window: int):
+        if self.type == WindowStrategyType.ACC:
+            start_window = 0
+        else:
+            if end_window - self.size >= 0:
+                start_window = end_window - self.size
+            else:
+                start_window = 0
+        return start_window
 
 
 class FCAEProperties:
