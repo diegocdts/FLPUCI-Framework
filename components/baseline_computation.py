@@ -25,16 +25,18 @@ def discrete_pixels(pixels: np.array):
     return pixels
 
 
-def add_dictionary_entry(dictionary, tuple_of_users, value):
+def add_dictionary_entry(dictionary, index_i, index_j, value):
     """
     Adds a new entry in a provided dictionary
     :param dictionary: A dictionary where the keys are tuples of user indices
-    :param tuple_of_users: A tuple of user indices
+    :param index_i: The index of the user i
+    :param index_j: The index of the user j
     :param value: The value to be added
     """
-    if dictionary.get(tuple_of_users) is not None:
-        value = dictionary.get(tuple_of_users) + value
-    dictionary[tuple_of_users] = value
+    key = f'{index_i}_{index_j}'
+    if dictionary.get(key) is not None:
+        value = dictionary.get(key) + value
+    dictionary[key] = float(value)
 
 
 def export_dictionary(dictionary, output_file_path):
@@ -167,14 +169,15 @@ class BaselineComputation:
                     id_i = series_i.id
                     aux_df = file_df[file_df.id != series_i.id]
                     aux_df = aux_df[aux_df.cell == series_i.cell]
-                    aux_df = aux_df[aux_df.entry >= series_i.entry]
+                    aux_df = aux_df[aux_df.exit > series_i.entry]
                     aux_df = aux_df[aux_df.entry < series_i.exit]
                     for index_j, series_j in aux_df.iterrows():
                         id_j = series_j.id
+                        last_entry = max(series_i.entry, series_j.entry)
                         first_exit = min(series_i.exit, series_j.exit)
-                        contact_time_value = first_exit - series_j.entry
-                        add_dictionary_entry(contact_times, (id_i, id_j), contact_time_value)
-                        add_dictionary_entry(contact_times, (id_j, id_i), contact_time_value)
+                        contact_time_value = first_exit - last_entry
+                        add_dictionary_entry(contact_times, id_i, id_j, contact_time_value/2)
+                        add_dictionary_entry(contact_times, id_j, id_i, contact_time_value/2)
                     del aux_df
                 del file_df
                 export_dictionary(contact_times, output_file_path)
@@ -220,19 +223,16 @@ class BaselineComputation:
                                 continue
 
                             mse_value = f_mse(image_i, image_j)
-                            add_dictionary_entry(mse, (index_i, index_j), mse_value)
-                            add_dictionary_entry(mse, (index_j, index_i), mse_value)
+                            add_dictionary_entry(mse, index_i, index_j, mse_value)
 
                             data_range = max(image_i.max(), image_j.max()) - min(image_i.min(), image_j.min())
                             ssim_value = f_ssim(image_i, image_j, win_size=win_size, data_range=data_range)
-                            add_dictionary_entry(ssim, (index_i, index_j), ssim_value)
-                            add_dictionary_entry(ssim, (index_j, index_i), ssim_value)
+                            add_dictionary_entry(ssim, index_i, index_j, ssim_value)
 
                             ari_value = f_ari(
                                 discrete_pixels(image_i.reshape(self.dataset.width * self.dataset.height)),
                                 discrete_pixels(image_j.reshape(self.dataset.width * self.dataset.height)))
-                            add_dictionary_entry(ari, (index_i, index_j), ari_value)
-                            add_dictionary_entry(ari, (index_j, index_i), ari_value)
+                            add_dictionary_entry(ari, index_i, index_j, ari_value)
                     export_dictionary(mse, mse_output_path)
                     export_dictionary(ssim, ssim_output_path)
                     export_dictionary(ari, ari_output_path)
@@ -244,7 +244,7 @@ def compute_baseline(dataset: Dataset):
     :param dataset: The Dataset object
     """
     baseline = BaselineComputation(dataset)
-    baseline.cell_entry_exit()
-    baseline.interval_entry_exit()
+    #baseline.cell_entry_exit()
+    #baseline.interval_entry_exit()
     baseline.contact_time()
     baseline.image_metrics()
