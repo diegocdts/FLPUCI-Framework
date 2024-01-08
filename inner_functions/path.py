@@ -27,5 +27,8 @@ def metric_interval_json(metric: ImageMetric, interval: int):
     return '{}_interval_{}.json'.format(metric.value, interval)
 
 
+def start_end_window_dir(start_window, end_window):
+    return 'win_{}_{}'.format(start_window, end_window)
+
 def path_exists(path: str):
     return os.path.exists(path)
