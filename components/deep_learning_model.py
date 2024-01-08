@@ -2,6 +2,7 @@ import tensorflow as tf
 
 from components.sample_generation import SampleHandler
 from inner_functions.path import get_file_path, path_exists, start_end_window_dir
+from inner_types.data import Dataset
 from inner_types.learning import LearningApproach, FCAEProperties, TrainingParameters
 from inner_types.path import Path
 from utils.losses import LossesHandler
@@ -9,8 +10,9 @@ from utils.losses import LossesHandler
 
 class FullConvolutionalAutoEncoder:
 
-    def __init__(self, sample_handler: SampleHandler, properties: FCAEProperties):
-        self.sample_handler = sample_handler
+    def __init__(self, dataset: Dataset, parameters: TrainingParameters, properties: FCAEProperties):
+        self.sample_handler = SampleHandler(dataset)
+        self.parameters = parameters
         self.f8_checkpoint = Path.f8_checkpoints(self.sample_handler.dataset.name, LearningApproach.CEN)
         self.model = model_build(properties)
         self.compile(properties)
@@ -24,7 +26,7 @@ class FullConvolutionalAutoEncoder:
         return tf.keras.callbacks.ModelCheckpoint(filepath=get_file_path(path, 'cp.ckpt'),
                                                   save_weights_only=True, verbose=1)
 
-    def training(self, start_window: int, end_window: int, parameters: TrainingParameters):
+    def training(self, start_window: int, end_window: int):
         path = get_file_path(self.f8_checkpoint, start_end_window_dir(start_window, end_window))
         loss_handler = LossesHandler(path, LearningApproach.CEN)
 
@@ -34,8 +36,12 @@ class FullConvolutionalAutoEncoder:
         else:
             training_data, training_indices_list = self.sample_handler.samples_as_list(start_window, end_window)
             testing_data, testing_indices_list = self.sample_handler.samples_as_list(end_window, end_window + 1)
-            history = self.model.fit(training_data, training_data, batch_size=parameters.batch_size,
-                                     epochs=parameters.epochs, verbose=1, callbacks=[self.checkpoint(path)],
+            history = self.model.fit(x=training_data,
+                                     y=training_data,
+                                     batch_size=self.parameters.batch_size,
+                                     epochs=self.parameters.epochs,
+                                     verbose=1,
+                                     callbacks=[self.checkpoint(path)],
                                      validation_data=(testing_data, testing_data))
             loss_handler.append(history.history['loss'], history.history['val_loss'])
             loss_handler.save()
