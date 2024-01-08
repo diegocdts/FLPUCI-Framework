@@ -12,6 +12,11 @@ from sklearn.metrics.cluster import adjusted_rand_score as f_ari
 
 
 def discrete_pixels(pixels: np.array):
+    """
+    Converts the values of pixels to the range [0, 255]
+    :param pixels: The numpy array of pixels
+    :return: A numpy array with converted values of pixels
+    """
     pixels = pixels * 255
     pixels = pixels.astype("int64")
     return pixels
@@ -20,6 +25,10 @@ def discrete_pixels(pixels: np.array):
 class BaselineComputation:
 
     def __init__(self, dataset: Dataset):
+        """
+        Runs baseline computations regarding contact time and similarity and dissimilarity metrics among nodes
+        :param dataset: A Dataset object
+        """
         self.f2_data = Path.f2_data(dataset.name)
         self.f3_dm = Path.f3_dm(dataset.name)
         self.f4_entry_exit = Path.f4_entry_exit(dataset.name)
@@ -32,6 +41,10 @@ class BaselineComputation:
         self.last_interval = self.get_last_intervals()
 
     def get_last_intervals(self):
+        """
+        Gets the last interval in the trace as a index
+        :return: The last interval index
+        """
         root = Path.f3_dm(self.dataset.name)
         path = get_file_path(root, sorted_files(root)[0])
         df = pd.read_csv(path)
@@ -39,6 +52,9 @@ class BaselineComputation:
         return last_interval
 
     def cell_entry_exit(self):
+        """
+        Computes the entry and exit times of each user in cells
+        """
         y_padding = 1 if self.dataset.paddingYX[0] else 0
         x_padding = 1 if self.dataset.paddingYX[1] else 0
 
@@ -80,6 +96,9 @@ class BaselineComputation:
                         output_file.write(new_lines)
 
     def interval_entry_exit(self):
+        """
+        Separates the users' entry and exit into cells by intervals
+        """
         file_list = sorted_files(self.f4_entry_exit)
         file_name = get_file_path(self.f3_dm, file_list[0])
         displacement_matrix = pd.read_csv(file_name)
@@ -105,6 +124,9 @@ class BaselineComputation:
                 df.to_csv(output_file_path, index=False)
 
     def contact_time(self):
+        """
+        Computes the contact time between each pair of users at each interval
+        """
         for interval in range(self.last_interval):
 
             output_file_path = get_file_path(self.f6_contact_time, interval_csv(interval))
@@ -136,6 +158,9 @@ class BaselineComputation:
                 contact_times_df.to_csv(output_file_path, index=False)
 
     def image_metrics(self):
+        """
+        Computes the similarity and dissimilarity metrics between each pair of users at each interval
+        """
         win_size = 3
 
         for interval in range(self.last_interval):
@@ -187,6 +212,10 @@ class BaselineComputation:
 
 
 def compute_baseline(dataset: Dataset):
+    """
+    Runs the BaselineComputation script for a dataset
+    :param dataset: The Dataset object
+    """
     baseline = BaselineComputation(dataset)
     baseline.cell_entry_exit()
     baseline.interval_entry_exit()
