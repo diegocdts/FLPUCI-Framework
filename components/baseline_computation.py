@@ -1,8 +1,11 @@
+import json
+
 import numpy as np
 import pandas as pd
 
 from components.sample_generation import SampleHandler
-from inner_functions.path import get_file_path, sorted_files, interval_csv, path_exists, metric_interval_csv
+from inner_functions.path import get_file_path, sorted_files, interval_csv, path_exists, metric_interval_csv, \
+    interval_json
 from inner_types.data import Dataset
 from inner_types.path import Path
 from inner_types.validation import ImageMetric
@@ -20,6 +23,17 @@ def discrete_pixels(pixels: np.array):
     pixels = pixels * 255
     pixels = pixels.astype("int64")
     return pixels
+
+
+def add_contact_time(dictionary, tuple_of_users, contact_time_value):
+    if dictionary.get(tuple_of_users) is not None:
+        contact_time_value = dictionary.get(tuple_of_users) + contact_time_value
+    dictionary[tuple_of_users] = contact_time_value
+
+
+def export_contact_time(dictionary, output_file_path):
+    with open(output_file_path, 'w') as json_file:
+        json.dump(dictionary, json_file)
 
 
 class BaselineComputation:
@@ -128,8 +142,7 @@ class BaselineComputation:
         Computes the contact time between each pair of users at each interval
         """
         for interval in range(self.last_interval):
-
-            output_file_path = get_file_path(self.f6_contact_time, interval_csv(interval))
+            output_file_path = get_file_path(self.f6_contact_time, interval_json(interval))
 
             if not path_exists(output_file_path):
 
@@ -137,8 +150,7 @@ class BaselineComputation:
                 file_path = get_file_path(self.f5_interval_entry_exit, interval_csv(interval))
                 file_df = pd.read_csv(file_path)
 
-                total_nodes = file_df['id'].nunique()
-                contact_times = np.zeros(shape=(total_nodes, total_nodes))
+                contact_times = {}
 
                 for index_i, series_i in file_df.iterrows():
                     id_i = series_i.id
@@ -147,15 +159,14 @@ class BaselineComputation:
                     aux_df = aux_df[aux_df.entry >= series_i.entry]
                     aux_df = aux_df[aux_df.entry < series_i.exit]
                     for index_j, series_j in aux_df.iterrows():
-                        idj = series_j.id
+                        id_j = series_j.id
                         first_exit = min(series_i.exit, series_j.exit)
-                        contact_interval = first_exit - series_j.entry
-                        contact_times[id_i, idj] = contact_times[id_i, idj] + contact_interval
-                        contact_times[idj, id_i] = contact_times[idj, id_i] + contact_interval
+                        contact_time_value = first_exit - series_j.entry
+                        add_contact_time(contact_times, (id_i, id_j), contact_time_value)
+                        add_contact_time(contact_times, (id_j, id_i), contact_time_value)
                     del aux_df
                 del file_df
-                contact_times_df = pd.DataFrame(contact_times)
-                contact_times_df.to_csv(output_file_path, index=False)
+                export_contact_time(contact_times, output_file_path)
 
     def image_metrics(self):
         """

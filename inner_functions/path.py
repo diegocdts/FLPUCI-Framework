@@ -15,6 +15,10 @@ def interval_csv(interval: int):
     return 'interval_{}.csv'.format(interval)
 
 
+def interval_json(interval: int):
+    return 'interval_{}.json'.format(interval)
+
+
 def metric_interval_csv(metric: ImageMetric, interval: int):
     return '{}_interval_{}.csv'.format(metric.value, interval)
 
