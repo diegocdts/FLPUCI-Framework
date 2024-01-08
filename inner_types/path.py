@@ -47,13 +47,13 @@ class Path:
         return dir_exists_create('{}/f7_metrics/'.format(dataset))
 
     @staticmethod
-    def f8_results(dataset: str, approach: LearningApproach, strategy: WindowStrategy):
-        return dir_exists_create('{}/f8_results/{}/{}/'.format(dataset, approach.value, strategy))
+    def f8_checkpoints(dataset: str, approach: LearningApproach):
+        return dir_exists_create('{}/f8_checkpoints/{}/'.format(dataset, approach.value))
 
     @staticmethod
-    def f8_results_match(dataset: str, approach: LearningApproach):
-        return dir_exists_create('{}/f8_results/{}/strategies_match/'.format(dataset, approach.value))
+    def f9_results(dataset: str, approach: LearningApproach, strategy: WindowStrategy):
+        return dir_exists_create('{}/f9_results/{}/{}/'.format(dataset, approach.value, strategy))
 
     @staticmethod
-    def f9_checkpoints(dataset: str, approach: LearningApproach):
-        return dir_exists_create('{}/f9_checkpoints/{}/'.format(dataset, approach.value))
+    def f9_results_match(dataset: str, approach: LearningApproach):
+        return dir_exists_create('{}/f9_results/{}/strategies_match/'.format(dataset, approach.value))
