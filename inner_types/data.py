@@ -1,9 +1,9 @@
 
-class LatYLonXTimeIndices:
+class LatYLonXTimeIndexes:
 
     def __init__(self, lat_y: int, lon_x: int, time: int):
         """
-        Specifies the index of the raw dataset attribute inside the file lines
+        Specifies the indexes of the raw dataset attribute inside the file lines
         :param lat_y: Index of the latitude or y attribute
         :param lon_x: Index of the longitude or x attribute
         :param time: Index of the time attribute
@@ -24,7 +24,7 @@ class Dataset:
                  lon_x_min: float,
                  lon_x_max: float,
                  resolution: tuple,
-                 indices: LatYLonXTimeIndices,
+                 attribute_indexes: LatYLonXTimeIndexes,
                  last_epoch: int = None,
                  is_lat_lon: bool = True,
                  paddingYX: tuple = (False, False)):
@@ -38,7 +38,7 @@ class Dataset:
         :param lon_x_min: The min longitude or x
         :param lon_x_max: The max longitude or x
         :param resolution: A int tuple indicating the cell resolution i.e., (height, width)
-        :param indices: A LatYLonXTimeIndices object
+        :param attribute_indexes: A LatYLonXTimeIndexes object
         :param last_epoch: The dataset final epoch time (Optional)
         :param is_lat_lon: A bool value to indicate if the raw data has lat_lon or y_x geo-information (Optional)
         :param paddingYX: A bool tuple indicating if a padding should be put over the y and x dimensions of the final
@@ -55,7 +55,7 @@ class Dataset:
         self.resolution = resolution
         self.is_lat_lon = is_lat_lon
         self.paddingYX = paddingYX
-        self.indices = indices
+        self.attribute_indexes = attribute_indexes
         self.epoch_size = len(str(first_epoch))
         self.height = None
         self.width = None
