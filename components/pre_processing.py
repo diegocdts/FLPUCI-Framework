@@ -55,9 +55,9 @@ class CleaningData:
         :return: The raw data attributes (lon or x, lat or y, and time)
         """
         split = line.split(splitter)
-        lon_x = float(split[self.dataset.indices.lon_x])
-        lat_y = float(split[self.dataset.indices.lat_y])
-        time = split[self.dataset.indices.time].replace(' ', '').replace('\n', '')
+        lon_x = float(split[self.dataset.attribute_indexes.lon_x])
+        lat_y = float(split[self.dataset.attribute_indexes.lat_y])
+        time = split[self.dataset.attribute_indexes.time].replace(' ', '').replace('\n', '')
         time = int(time)
         return lon_x, lat_y, time
 
