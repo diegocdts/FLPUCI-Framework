@@ -123,18 +123,18 @@ class SampleHandler:
         Gets the user datasets of samples inside a window
         :param start_window: The interval that indicates the start of the window to get samples
         :param end_window: The interval that indicates the end of the window to get samples
-        :return: The list of user datasets and the indices of users
+        :return: The list of user datasets and the user_indexes of users
         """
-        indices = []
+        user_indexes = []
         datasets = []
         for index, file_name in enumerate(sorted_files(self.f3_dm)):
             file_path = get_file_path(self.f3_dm, file_name)
             user_samples = self.get_samples(file_path, start_window, end_window)
             if len(user_samples) > 0:
-                indices.append(index)
+                user_indexes.append(index)
                 datasets.append(user_samples)
             del user_samples
-        return datasets, indices
+        return datasets, user_indexes
 
     def get_samples(self, file_path: str, start_window: int, end_window: int, add_empty: bool = False):
         """
@@ -168,7 +168,7 @@ class SampleHandler:
         :param end_window: The interval that indicates the end of the window to get samples
         :return: Flat list of samples
         """
-        datasets, indices = self.get_datasets(start_window, end_window)
+        datasets, user_indexes = self.get_datasets(start_window, end_window)
         samples = []
         for dataset in datasets:
             for sample in dataset:
@@ -176,7 +176,7 @@ class SampleHandler:
                 del sample
             del dataset
         del datasets
-        return np.array(samples), indices
+        return np.array(samples), user_indexes
 
     def random_dataset(self):
         """
