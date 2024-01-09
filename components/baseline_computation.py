@@ -8,7 +8,7 @@ from inner_functions.path import get_file_path, sorted_files, interval_csv, path
     interval_json
 from inner_types.data import Dataset
 from inner_types.path import Path
-from inner_types.validation import ImageMetric
+from inner_types.validation import HeatmapMetric
 
 from skimage.metrics import mean_squared_error as f_mse, structural_similarity as f_ssim
 from sklearn.metrics.cluster import adjusted_rand_score as f_ari
@@ -28,7 +28,7 @@ def discrete_pixels(pixels: np.array):
 def add_dictionary_entry(dictionary, index_i, index_j, value):
     """
     Adds a new entry in a provided dictionary
-    :param dictionary: A dictionary where the keys are tuples of user indices
+    :param dictionary: A dictionary where the key is the combination of user indexes
     :param index_i: The index of the user i
     :param index_j: The index of the user j
     :param value: The value to be added
@@ -190,9 +190,9 @@ class BaselineComputation:
 
         for interval in range(self.last_interval):
 
-            mse_output_path = get_file_path(self.f7_metrics, metric_interval_json(ImageMetric.MSE, interval))
-            ssim_output_path = get_file_path(self.f7_metrics, metric_interval_json(ImageMetric.SSIM, interval))
-            ari_output_path = get_file_path(self.f7_metrics, metric_interval_json(ImageMetric.ARI, interval))
+            mse_output_path = get_file_path(self.f7_metrics, metric_interval_json(HeatmapMetric.MSE, interval))
+            ssim_output_path = get_file_path(self.f7_metrics, metric_interval_json(HeatmapMetric.SSIM, interval))
+            ari_output_path = get_file_path(self.f7_metrics, metric_interval_json(HeatmapMetric.ARI, interval))
 
             if not path_exists(mse_output_path):
                 print(' > image_metrics:', interval)
