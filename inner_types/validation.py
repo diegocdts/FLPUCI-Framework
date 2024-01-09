@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ImageMetric(Enum):
+class HeatmapMetric(Enum):
     MSE = 'MSE'
     SSIM = 'SSIM'
     ARI = 'ARI'
