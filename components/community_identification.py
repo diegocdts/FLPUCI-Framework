@@ -33,4 +33,4 @@ class CommunityIdentification:
 
             self.model.training(start_window, end_window)
 
-            encodings, indices = self.model.encoder_prediction(start_window=end_window, end_window=end_window + 1)
+            encodings, user_indexes = self.model.encoder_prediction(start_window=end_window, end_window=end_window + 1)
