@@ -8,9 +8,9 @@ from inner_types.names import ExportedFilesName
 class LossesHandler:
 
     def __init__(self, path, approach: LearningApproach):
-        self.training_path = get_file_path(path, ExportedFilesName.TRAINING_LOSS.value)
-        self.testing_path = get_file_path(path, ExportedFilesName.TESTING_LOSS.value)
-        self.plot_path = get_file_path(path, ExportedFilesName.LOSSES_CURVE.value)
+        self.training_path = get_file_path(path, ExportedFilesName.TRAINING_LOSS_CSV.value)
+        self.testing_path = get_file_path(path, ExportedFilesName.TESTING_LOSS_CSV.value)
+        self.plot_path = get_file_path(path, ExportedFilesName.LOSSES_PNG.value)
         self.approach = approach
         self.training_losses = np.array([])
         self.testing_losses = np.array([])
