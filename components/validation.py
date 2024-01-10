@@ -1,19 +1,32 @@
 import numpy as np
 import pandas as pd
 from itertools import product
+
+from scipy import stats
 from sklearn.mixture import GaussianMixture
 
 from inner_functions.files import read_json
-from inner_functions.names import sources, column_k
+from inner_functions.names import sources, column_k, curves
 from inner_functions.path import get_file_path, interval_dir, interval_json, metric_interval_json
 from inner_types.data import Dataset
 from inner_types.learning import LearningApproach, WindowStrategyType
+from inner_types.names import ExportedFilesName
 from inner_types.path import Path
 from inner_types.validation import HeatmapMetric
 
 
 def dataframe_basis():
     return pd.DataFrame(columns=['source'], data=sources())
+
+
+def curve_dataframe_basis():
+    return pd.DataFrame(columns=['curve'], data=curves())
+
+
+def confidence_interval(data):
+    mean, sigma = np.mean(data), np.std(data)
+    conf_int = stats.norm.interval(0.95, loc=mean, scale=sigma / np.sqrt(len(data)))
+    return conf_int
 
 
 class Clustering:
@@ -46,6 +59,7 @@ def intra_cluster_computation(dictionary: dict, clusters: np.array, labels: np.a
         all_intra_values = np.append(all_intra_values, intra_cluster_values)
     return all_intra_values
 
+
 def inter_cluster_computation(dictionary: dict, clusters: np.array, labels: np.array,
                               user_indexes: np.array):
     all_inter_values = np.array([])
@@ -72,15 +86,28 @@ def best_candidate(contact_time_dataframe: pd.DataFrame, k: int, best_contact_ti
         return best_contact_time_avg, best_k
 
 
+def export_avg_ci(dataframe: pd.DataFrame, path: str, file_name: str):
+    curve_dataframe = curve_dataframe_basis()
+    for index, row in dataframe.iterrows():
+        for column in dataframe.columns[1:]:  # columns[0] is source name (all_pairs, intra and inter_community)
+            values = row[column]
+            curves_values = [confidence_interval(values)[0], values.mean(), confidence_interval(values)[1]]
+            if index == 0:  # index == 0 (all_pairs)
+                curve_dataframe['all_pairs'] = curves_values
+            else:
+                curve_dataframe[f'{column}_{sources()[index]}'] = curves_values
+    curve_dataframe.to_csv(get_file_path(path, file_name), sep=',', index=False)
+
+
 class Validation:
 
-    def __init__(self, dataset: Dataset, type_learning: LearningApproach, strategy_type: WindowStrategyType):
-        self.type_learning = type_learning
+    def __init__(self, dataset: Dataset, approach: LearningApproach, strategy_type: WindowStrategyType):
+        self.type_learning = approach
         self.strategy_type = strategy_type
 
         self.f6_contact_time = Path.f6_contact_time(dataset.name)
         self.f7_metrics = Path.f7_metrics(dataset.name)
-        self.f9_results = Path.f9_results(dataset.name, type_learning, strategy_type)
+        self.f9_results = Path.f9_results(dataset.name, approach, strategy_type)
 
     def generate_communities(self, interval: int, input_data: np.array, user_indexes: np.array):
         path = get_file_path(self.f9_results, interval_dir(interval))
@@ -90,7 +117,7 @@ class Validation:
         ari_dataframe = dataframe_basis()
 
         clustering = Clustering(input_data)
-        helper = ValidationHelper(interval, path)
+        helper = ValidationHelper(interval)
 
         best_contact_time_avg, best_k = 0, None
 
@@ -111,7 +138,11 @@ class Validation:
             best_contact_time_avg, best_k = best_candidate(contact_time_dataframe, k, best_contact_time_avg, best_k)
 
         helper.sort_scores(best_k)
-        #continuar a partir daqui
+
+        export_avg_ci(contact_time_dataframe, path, ExportedFilesName.CONTACT_TIME_CSV.value)
+        export_avg_ci(mse_dataframe, path, ExportedFilesName.MSE_CSV.value)
+        export_avg_ci(ssim_dataframe, path, ExportedFilesName.SSIM_CSV.value)
+        export_avg_ci(ari_dataframe, path, ExportedFilesName.ARI_CSV.value)
 
     def metric_validation(self, interval: int, clusters: np.array, labels: np.array, user_indexes: np.array,
                           metric: HeatmapMetric = None):
@@ -129,7 +160,7 @@ class Validation:
 
 class ValidationHelper:
 
-    def __init__(self, interval: int, path: str):
+    def __init__(self, interval: int):
         self.interval = interval
         self.aic_list = []
         self.bic_list = []
@@ -148,4 +179,3 @@ class ValidationHelper:
         chosen_best = column_k(best_k)
 
         self.columns_4_plot = ['source', chosen_aic, chosen_bic, chosen_best]
-
