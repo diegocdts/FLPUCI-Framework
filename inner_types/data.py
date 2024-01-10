@@ -1,3 +1,5 @@
+import numpy as np
+
 
 class LatYLonXTimeIndexes:
 
@@ -27,7 +29,8 @@ class Dataset:
                  attribute_indexes: LatYLonXTimeIndexes,
                  last_epoch: int = None,
                  is_lat_lon: bool = True,
-                 paddingYX: tuple = (False, False)):
+                 paddingYX: tuple = (False, False),
+                 k_candidates: int = 20):
         """
         Defines the attributes of a data set
         :param name: Dataset name
@@ -42,6 +45,7 @@ class Dataset:
         :param last_epoch: The dataset final epoch time (Optional)
         :param is_lat_lon: A bool value to indicate if the raw data has lat_lon or y_x geo-information (Optional)
         :param paddingYX: A bool tuple indicating if a padding should be put over the y and x dimensions of the final
+        :param k_candidates: Maximum number of communities to test
         image
         """
         self.name = name
@@ -59,6 +63,7 @@ class Dataset:
         self.epoch_size = len(str(first_epoch))
         self.height = None
         self.width = None
+        self.k_candidates = np.arange(2, k_candidates + 1)
 
     def set_height_width(self, float_height: float, float_width: float):
         """
