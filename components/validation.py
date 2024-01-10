@@ -10,9 +10,11 @@ from inner_functions.names import sources, column_k, curves
 from inner_functions.path import get_file_path, interval_dir, interval_json, metric_interval_json
 from inner_types.data import Dataset
 from inner_types.learning import LearningApproach, WindowStrategyType
-from inner_types.names import ExportedFilesName
+from inner_types.names import ExportedFiles
 from inner_types.path import Path
+from inner_types.plots import AxisLabel
 from inner_types.validation import HeatmapMetric
+from utils.plots import plot_metric
 
 
 def dataframe_basis():
@@ -86,22 +88,32 @@ def best_candidate(contact_time_dataframe: pd.DataFrame, k: int, best_contact_ti
         return best_contact_time_avg, best_k
 
 
-def export_avg_ci(dataframe: pd.DataFrame, path: str, file_name: str):
+def export_avg_ci(dataframe: pd.DataFrame,
+                  path: str,
+                  csv_name: str,
+                  png_name: str,
+                  k_candidates: np.arange,
+                  ks_chosen: list,
+                  axis_label: AxisLabel):
     curve_dataframe = curve_dataframe_basis()
     for index, row in dataframe.iterrows():
         for column in dataframe.columns[1:]:  # columns[0] is source name (all_pairs, intra and inter_community)
             values = row[column]
             curves_values = [confidence_interval(values)[0], values.mean(), confidence_interval(values)[1]]
             if index == 0:  # index == 0 (all_pairs)
-                curve_dataframe['all_pairs'] = curves_values
+                curve_dataframe[sources()[0]] = curves_values
             else:
-                curve_dataframe[f'{column}_{sources()[index]}'] = curves_values
-    curve_dataframe.to_csv(get_file_path(path, file_name), sep=',', index=False)
+                curve_dataframe[f'{column}|{sources()[index]}'] = curves_values
+    csv_path = get_file_path(path, csv_name)
+    curve_dataframe.to_csv(csv_path, sep=',', index=False)
+    png_path = get_file_path(path, png_name)
+    plot_metric(curve_dataframe, k_candidates, ks_chosen, axis_label, png_path)
 
 
 class Validation:
 
     def __init__(self, dataset: Dataset, approach: LearningApproach, strategy_type: WindowStrategyType):
+        self.dataset = dataset
         self.type_learning = approach
         self.strategy_type = strategy_type
 
@@ -121,7 +133,7 @@ class Validation:
 
         best_contact_time_avg, best_k = 0, None
 
-        for k in range(2, 20):
+        for k in self.dataset.k_candidates:
             print(f'Validation in interval {interval} with k = {k}')
             clusters, labels, aic, bic = clustering.gmm(k)
             helper.append_score(k, aic, bic)
@@ -139,10 +151,23 @@ class Validation:
 
         helper.sort_scores(best_k)
 
-        export_avg_ci(contact_time_dataframe, path, ExportedFilesName.CONTACT_TIME_CSV.value)
-        export_avg_ci(mse_dataframe, path, ExportedFilesName.MSE_CSV.value)
-        export_avg_ci(ssim_dataframe, path, ExportedFilesName.SSIM_CSV.value)
-        export_avg_ci(ari_dataframe, path, ExportedFilesName.ARI_CSV.value)
+        export_avg_ci(contact_time_dataframe, path,
+                      ExportedFiles.CONTACT_TIME_CSV.value,
+                      ExportedFiles.CONTACT_TIME_PNG.value,
+                      self.dataset.k_candidates, helper.ks_chosen,
+                      AxisLabel.CONTACT_TIME.value)
+        export_avg_ci(mse_dataframe, path,
+                      ExportedFiles.MSE_CSV.value, ExportedFiles.MSE_PNG.value,
+                      self.dataset.k_candidates, helper.ks_chosen,
+                      AxisLabel.MSE.value)
+        export_avg_ci(ssim_dataframe, path,
+                      ExportedFiles.SSIM_CSV.value, ExportedFiles.SSIM_PNG.value,
+                      self.dataset.k_candidates, helper.ks_chosen,
+                      AxisLabel.SSIM.value)
+        export_avg_ci(ari_dataframe, path,
+                      ExportedFiles.ARI_CSV.value, ExportedFiles.ARI_PNG.value,
+                      self.dataset.k_candidates, helper.ks_chosen,
+                      AxisLabel.ARI.value)
 
     def metric_validation(self, interval: int, clusters: np.array, labels: np.array, user_indexes: np.array,
                           metric: HeatmapMetric = None):
@@ -164,7 +189,7 @@ class ValidationHelper:
         self.interval = interval
         self.aic_list = []
         self.bic_list = []
-        self.columns_4_plot = None
+        self.ks_chosen = None
 
     def append_score(self, k: int, aic: float, bic: float):
         self.aic_list.append([aic, k])
@@ -174,8 +199,8 @@ class ValidationHelper:
         self.aic_list.sort()
         self.bic_list.sort()
 
-        chosen_aic = column_k(self.aic_list[0][1])
-        chosen_bic = column_k(self.bic_list[0][1])
-        chosen_best = column_k(best_k)
+        chosen_aic = self.aic_list[0][1]
+        chosen_bic = self.bic_list[0][1]
+        chosen_best = best_k
 
-        self.columns_4_plot = ['source', chosen_aic, chosen_bic, chosen_best]
+        self.ks_chosen = [chosen_aic, chosen_bic, chosen_best]
