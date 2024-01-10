@@ -10,4 +10,4 @@ rt = Dataset(name='romataxi', hours_per_interval=24, first_epoch=1391212800, lat
 
 ngsim = Dataset(name='ngsim', hours_per_interval=0.0833, first_epoch=1118846979, lat_y_min=0.0, lat_y_max=2235.252,
                 lon_x_min=0.0, lon_x_max=75.313, resolution=(40, 40), attribute_indexes=LatYLonXTimeIndexes(1, 0, 3),
-                is_lat_lon=False, paddingYX=(False, True))
+                is_lat_lon=False, paddingYX=(False, True), k_candidates=30)
