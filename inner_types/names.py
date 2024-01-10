@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ExportedFilesName(Enum):
+class ExportedFiles(Enum):
     TRAINING_LOSS_CSV = 'Training losses.csv'
     TESTING_LOSS_CSV = 'Testing losses.csv'
     LOSSES_PNG = 'Losses curves.png'
@@ -10,3 +10,8 @@ class ExportedFilesName(Enum):
     MSE_CSV = 'MSE.csv'
     SSIM_CSV = 'SSIM.csv'
     ARI_CSV = 'ARI.csv'
+
+    CONTACT_TIME_PNG = 'Contact time.png'
+    MSE_PNG = 'MSE.png'
+    SSIM_PNG = 'SSIM.png'
+    ARI_PNG = 'ARI.png'
