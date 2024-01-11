@@ -3,6 +3,7 @@ import numpy as np
 from inner_functions.path import get_file_path, path_exists
 from inner_types.learning import LearningApproach
 from inner_types.names import ExportedFiles
+from utils.plots import plot_losses
 
 
 class LossesHandler:
@@ -39,6 +40,7 @@ class LossesHandler:
                 self.testing_losses = np.fromfile(self.testing_path, sep=',')
             return self.training_losses, self.testing_losses
 
-    def save(self):
+    def save_losses(self):
         self.training_losses.tofile(self.training_path, sep=',')
         self.testing_losses.tofile(self.testing_path, sep=',')
+        plot_losses(self.training_losses, self.testing_losses, self.approach, self.plot_path)
