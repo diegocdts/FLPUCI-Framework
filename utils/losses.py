@@ -1,6 +1,6 @@
 import numpy as np
 
-from inner_functions.path import get_file_path, path_exists
+from inner_functions.path import build_path, path_exists
 from inner_types.learning import LearningApproach
 from inner_types.names import ExportedFiles
 from utils.plots import plot_losses
@@ -9,9 +9,9 @@ from utils.plots import plot_losses
 class LossesHandler:
 
     def __init__(self, path, approach: LearningApproach):
-        self.training_path = get_file_path(path, ExportedFiles.TRAINING_LOSS_CSV.value)
-        self.testing_path = get_file_path(path, ExportedFiles.TESTING_LOSS_CSV.value)
-        self.plot_path = get_file_path(path, ExportedFiles.LOSSES_PNG.value)
+        self.training_path = build_path(path, ExportedFiles.TRAINING_LOSS_CSV.value)
+        self.testing_path = build_path(path, ExportedFiles.TESTING_LOSS_CSV.value)
+        self.plot_path = build_path(path, ExportedFiles.LOSSES_PNG.value)
         self.approach = approach
         self.training_losses = np.array([])
         self.testing_losses = np.array([])

@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 from components.sample_generation import SampleHandler
-from inner_functions.path import get_file_path, path_exists, start_end_window_dir
+from inner_functions.path import build_path, path_exists, start_end_window_dir
 from inner_types.data import Dataset
 from inner_types.learning import LearningApproach, FCAEProperties, TrainingParameters
 from inner_types.path import Path
@@ -23,16 +23,16 @@ class FullConvolutionalAutoEncoder:
 
     @staticmethod
     def checkpoint(path: str):
-        return tf.keras.callbacks.ModelCheckpoint(filepath=get_file_path(path, 'cp.ckpt'),
+        return tf.keras.callbacks.ModelCheckpoint(filepath=build_path(path, 'cp.ckpt'),
                                                   save_weights_only=True, verbose=1)
 
     def training(self, start_window: int, end_window: int):
-        path = get_file_path(self.f8_checkpoint, start_end_window_dir(start_window, end_window))
+        path = build_path(self.f8_checkpoint, start_end_window_dir(start_window, end_window))
         loss_handler = LossesHandler(path, LearningApproach.CEN)
 
         if path_exists(path):
             loss_handler.load()
-            self.model.load_weights(get_file_path(path, 'cp.ckpt'))
+            self.model.load_weights(build_path(path, 'cp.ckpt'))
         else:
             training_data, training_indices_list = self.sample_handler.samples_as_list(start_window, end_window)
             testing_data, testing_indices_list = self.sample_handler.samples_as_list(end_window, end_window + 1)
@@ -48,11 +48,11 @@ class FullConvolutionalAutoEncoder:
             del training_data, testing_data, loss_handler
 
     def encoder_prediction(self, start_window: int, end_window: int):
-        samples, indices_list = self.sample_handler.samples_as_list(start_window, end_window)
+        samples, user_indexes = self.sample_handler.samples_as_list(start_window, end_window)
         encoder = trained_encoder(self.model)
         predictions = encoder.predict(samples)
         del samples, encoder
-        return predictions, indices_list
+        return predictions, user_indexes
 
 
 def dense_nodes_width_height(properties: FCAEProperties):

@@ -7,7 +7,7 @@ from sklearn.mixture import GaussianMixture
 
 from inner_functions.files import read_json
 from inner_functions.names import sources, column_k, curves
-from inner_functions.path import get_file_path, interval_dir, interval_json, metric_interval_json
+from inner_functions.path import build_path, interval_dir, interval_json, metric_interval_json, mkdir
 from inner_types.data import Dataset
 from inner_types.learning import LearningApproach, WindowStrategyType
 from inner_types.names import ExportedFiles
@@ -81,7 +81,7 @@ def inter_cluster_computation(dictionary: dict, clusters: np.array, labels: np.a
 
 
 def best_candidate(contact_time_dataframe: pd.DataFrame, k: int, best_contact_time_avg: float, best_k: int):
-    intra_contact_time_avg = contact_time_dataframe[contact_time_dataframe.columns[-1]][1]
+    intra_contact_time_avg = contact_time_dataframe[contact_time_dataframe.columns[-1]][1].mean()
     if intra_contact_time_avg > best_contact_time_avg:
         return intra_contact_time_avg, k
     else:
@@ -104,9 +104,9 @@ def export_avg_ci(dataframe: pd.DataFrame,
                 curve_dataframe[sources()[0]] = curves_values
             else:
                 curve_dataframe[f'{column}|{sources()[index]}'] = curves_values
-    csv_path = get_file_path(path, csv_name)
+    csv_path = build_path(path, csv_name)
     curve_dataframe.to_csv(csv_path, sep=',', index=False)
-    png_path = get_file_path(path, png_name)
+    png_path = build_path(path, png_name)
     plot_metric(curve_dataframe, k_candidates, ks_chosen, axis_label, png_path)
 
 
@@ -122,7 +122,7 @@ class Validation:
         self.f9_results = Path.f9_results(dataset.name, approach, strategy_type)
 
     def generate_communities(self, interval: int, input_data: np.array, user_indexes: np.array):
-        path = get_file_path(self.f9_results, interval_dir(interval))
+        path = mkdir(build_path(self.f9_results, interval_dir(interval)))
         contact_time_dataframe = dataframe_basis()
         mse_dataframe = dataframe_basis()
         ssim_dataframe = dataframe_basis()
@@ -155,26 +155,26 @@ class Validation:
                       ExportedFiles.CONTACT_TIME_CSV.value,
                       ExportedFiles.CONTACT_TIME_PNG.value,
                       self.dataset.k_candidates, helper.ks_chosen,
-                      AxisLabel.CONTACT_TIME.value)
+                      AxisLabel.CONTACT_TIME)
         export_avg_ci(mse_dataframe, path,
                       ExportedFiles.MSE_CSV.value, ExportedFiles.MSE_PNG.value,
                       self.dataset.k_candidates, helper.ks_chosen,
-                      AxisLabel.MSE.value)
+                      AxisLabel.MSE)
         export_avg_ci(ssim_dataframe, path,
                       ExportedFiles.SSIM_CSV.value, ExportedFiles.SSIM_PNG.value,
                       self.dataset.k_candidates, helper.ks_chosen,
-                      AxisLabel.SSIM.value)
+                      AxisLabel.SSIM)
         export_avg_ci(ari_dataframe, path,
                       ExportedFiles.ARI_CSV.value, ExportedFiles.ARI_PNG.value,
                       self.dataset.k_candidates, helper.ks_chosen,
-                      AxisLabel.ARI.value)
+                      AxisLabel.ARI)
 
     def metric_validation(self, interval: int, clusters: np.array, labels: np.array, user_indexes: np.array,
                           metric: HeatmapMetric = None):
         if metric is None:
-            path = get_file_path(self.f6_contact_time, interval_json(interval))
+            path = build_path(self.f6_contact_time, interval_json(interval))
         else:
-            path = get_file_path(self.f7_metrics, metric_interval_json(metric, interval))
+            path = build_path(self.f7_metrics, metric_interval_json(metric, interval))
         dictionary = read_json(path)
 
         all_pairs = np.array(list(dictionary.values()))

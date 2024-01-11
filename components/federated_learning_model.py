@@ -7,7 +7,7 @@ import tensorflow_federated as tff
 
 from components.deep_learning_model import model_build, trained_encoder
 from components.sample_generation import SampleHandler
-from inner_functions.path import get_file_path, start_end_window_dir
+from inner_functions.path import build_path, start_end_window_dir
 from inner_types.data import Dataset
 from inner_types.learning import TrainingParameters, FCAEProperties, LearningApproach
 from inner_types.path import Path
@@ -45,7 +45,7 @@ class FederatedDataHandler:
         return preprocessed.element_spec
 
     def users_data(self, start_window: int, end_window: int):
-        users_dataset_samples, indices_list = self.sample_handler.get_datasets(start_window, end_window)
+        users_dataset_samples, user_indexes = self.sample_handler.get_datasets(start_window, end_window)
         federated_dataset_samples = []
 
         for dataset in users_dataset_samples:
@@ -107,7 +107,7 @@ class FederatedFullConvolutionalAutoEncoder:
     def training(self, start_window: int, end_window: int):
         loop = asyncio.get_event_loop()
         rounds = self.federated_data_handler.parameters.rounds
-        path = get_file_path(self.f9_checkpoint, start_end_window_dir(start_window, end_window))
+        path = build_path(self.f9_checkpoint, start_end_window_dir(start_window, end_window))
         self.init_state_manager(path, rounds)
         next_round = self.get_next_round(loop)
 
@@ -131,10 +131,10 @@ class FederatedFullConvolutionalAutoEncoder:
             del training_data, testing_data, loss_handler
 
     def encoder_prediction(self, start_window: int, end_window: int):
-        samples, indices_list = self.federated_data_handler.sample_handler.samples_as_list(start_window, end_window)
+        samples, user_indexes = self.federated_data_handler.sample_handler.samples_as_list(start_window, end_window)
         keras_model = model_build(self.properties)
         self.state.global_model_weights.assign_weights_to(keras_model)
         encoder = trained_encoder(keras_model)
         predictions = encoder.predict(samples)
         del samples, encoder
-        return predictions, indices_list
+        return predictions, user_indexes

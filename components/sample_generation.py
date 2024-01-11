@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from inner_functions.path import sorted_files, get_file_path
+from inner_functions.path import sorted_files, build_path
 from inner_types.data import Dataset
 from inner_types.path import Path
 
@@ -103,7 +103,7 @@ class SampleHandler:
         min_x, min_y = sys.maxsize, sys.maxsize
         max_x, max_y = 0, 0
         for file_name in sorted_files(self.f2_data):
-            file_path = get_file_path(self.f2_data, file_name)
+            file_path = build_path(self.f2_data, file_name)
             df = pd.read_csv(file_path)
             if df.x.min() < min_x:
                 min_x = df.x.min()
@@ -123,18 +123,18 @@ class SampleHandler:
         Gets the user datasets of samples inside a window
         :param start_window: The interval that indicates the start of the window to get samples
         :param end_window: The interval that indicates the end of the window to get samples
-        :return: The list of user datasets and the user_indexes of users
+        :return: The list of user datasets and the indexes of users
         """
         user_indexes = []
         datasets = []
         for index, file_name in enumerate(sorted_files(self.f3_dm)):
-            file_path = get_file_path(self.f3_dm, file_name)
+            file_path = build_path(self.f3_dm, file_name)
             user_samples = self.get_samples(file_path, start_window, end_window)
             if len(user_samples) > 0:
                 user_indexes.append(index)
                 datasets.append(user_samples)
             del user_samples
-        return datasets, user_indexes
+        return datasets, np.array(user_indexes)
 
     def get_samples(self, file_path: str, start_window: int, end_window: int, add_empty: bool = False):
         """
@@ -166,7 +166,7 @@ class SampleHandler:
         Returns the user datasets of samples as a flat list of samples
         :param start_window: The interval that indicates the start of the window to get samples
         :param end_window: The interval that indicates the end of the window to get samples
-        :return: Flat list of samples
+        :return: Flat list of samples and the indexes of users
         """
         datasets, user_indexes = self.get_datasets(start_window, end_window)
         samples = []
@@ -186,7 +186,7 @@ class SampleHandler:
         def get_random():
             total_users = len(sorted_files(self.f3_dm))
             file_name = sorted_files(self.f3_dm)[random.randrange(total_users)]
-            file_path = get_file_path(self.f3_dm, file_name)
+            file_path = build_path(self.f3_dm, file_name)
             single_dataset = self.get_samples(file_path, 0, 1, add_empty=True)
             return single_dataset
         dataset = get_random()

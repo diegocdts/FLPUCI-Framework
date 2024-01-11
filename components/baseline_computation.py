@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from components.sample_generation import SampleHandler
-from inner_functions.path import get_file_path, sorted_files, interval_csv, path_exists, metric_interval_json, \
+from inner_functions.path import build_path, sorted_files, interval_csv, path_exists, metric_interval_json, \
     interval_json
 from inner_types.data import Dataset
 from inner_types.path import Path
@@ -73,7 +73,7 @@ class BaselineComputation:
         :return: The last interval index
         """
         root = Path.f3_dm(self.dataset.name)
-        path = get_file_path(root, sorted_files(root)[0])
+        path = build_path(root, sorted_files(root)[0])
         df = pd.read_csv(path)
         last_interval = len(df)
         return last_interval
@@ -87,8 +87,8 @@ class BaselineComputation:
 
         for file_name in sorted_files(self.f2_data):
 
-            file_path = get_file_path(self.f2_data, file_name)
-            output_file_path = get_file_path(self.f4_entry_exit, file_name)
+            file_path = build_path(self.f2_data, file_name)
+            output_file_path = build_path(self.f4_entry_exit, file_name)
 
             with open(file_path) as input_file:
                 file_lines = input_file.readlines()[1:]
@@ -127,14 +127,14 @@ class BaselineComputation:
         Separates the users' entry and exit into cells by intervals
         """
         file_list = sorted_files(self.f4_entry_exit)
-        file_name = get_file_path(self.f3_dm, file_list[0])
+        file_name = build_path(self.f3_dm, file_list[0])
         displacement_matrix = pd.read_csv(file_name)
 
         last_interval = len(displacement_matrix)
 
         for interval in range(last_interval):
 
-            output_file_path = get_file_path(self.f5_interval_entry_exit, interval_csv(interval))
+            output_file_path = build_path(self.f5_interval_entry_exit, interval_csv(interval))
 
             if not path_exists(output_file_path):
 
@@ -143,7 +143,7 @@ class BaselineComputation:
 
                 for file_index, file_name in enumerate(file_list):
 
-                    file_path = get_file_path(self.f4_entry_exit, file_name)
+                    file_path = build_path(self.f4_entry_exit, file_name)
                     cell_entry_exit = pd.read_csv(file_path)
                     cell_entry_exit = cell_entry_exit[cell_entry_exit.interval == interval]
                     cell_entry_exit['id'] = file_index
@@ -155,12 +155,12 @@ class BaselineComputation:
         Computes the contact time between each pair of users at each interval
         """
         for interval in range(self.last_interval):
-            output_file_path = get_file_path(self.f6_contact_time, interval_json(interval))
+            output_file_path = build_path(self.f6_contact_time, interval_json(interval))
 
             if not path_exists(output_file_path):
 
                 print(' > contact_time:', interval)
-                file_path = get_file_path(self.f5_interval_entry_exit, interval_csv(interval))
+                file_path = build_path(self.f5_interval_entry_exit, interval_csv(interval))
                 file_df = pd.read_csv(file_path)
 
                 contact_times = {}
@@ -190,9 +190,9 @@ class BaselineComputation:
 
         for interval in range(self.last_interval):
 
-            mse_output_path = get_file_path(self.f7_metrics, metric_interval_json(HeatmapMetric.MSE, interval))
-            ssim_output_path = get_file_path(self.f7_metrics, metric_interval_json(HeatmapMetric.SSIM, interval))
-            ari_output_path = get_file_path(self.f7_metrics, metric_interval_json(HeatmapMetric.ARI, interval))
+            mse_output_path = build_path(self.f7_metrics, metric_interval_json(HeatmapMetric.MSE, interval))
+            ssim_output_path = build_path(self.f7_metrics, metric_interval_json(HeatmapMetric.SSIM, interval))
+            ari_output_path = build_path(self.f7_metrics, metric_interval_json(HeatmapMetric.ARI, interval))
 
             if not path_exists(mse_output_path):
                 print(' > image_metrics:', interval)
@@ -200,7 +200,7 @@ class BaselineComputation:
 
                 for file_name in sorted_files(self.f3_dm):
 
-                    file_path = get_file_path(self.f3_dm, file_name)
+                    file_path = build_path(self.f3_dm, file_name)
 
                     samples_from_interval = self.sample_handler.get_samples(file_path, interval, interval + 1)
                     if len(samples_from_interval) > 0:

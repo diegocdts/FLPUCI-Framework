@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import utm
 
-from inner_functions.path import sorted_files, get_file_path
+from inner_functions.path import sorted_files, build_path
 from inner_types.data import Dataset
 from inner_types.path import Path
 
@@ -94,10 +94,10 @@ class CleaningData:
             interval_size = self.dataset.hours_per_interval * time_unit_dict(self.dataset.epoch_size)
 
             for file_name in sorted_files(self.f1_raw_data):
-                file_path = get_file_path(self.f1_raw_data, file_name)
+                file_path = build_path(self.f1_raw_data, file_name)
                 lines, splitter = get_lines_and_splitter(file_path)
 
-                output_file_path = get_file_path(self.f2_data, file_name)
+                output_file_path = build_path(self.f2_data, file_name)
                 with open(output_file_path, 'a') as file:
                     file.write(self.header)
 
@@ -182,7 +182,7 @@ class DisplacementMatrix:
         min_x, min_y = sys.maxsize, sys.maxsize
         max_x, max_y = 0, 0
         for file_name in sorted_files(self.f2_data):
-            file_path = get_file_path(self.f2_data, file_name)
+            file_path = build_path(self.f2_data, file_name)
             df = pd.read_csv(file_path)
             if df.interval.max() > max_interval:
                 max_interval = df.interval.max()
@@ -243,8 +243,8 @@ class DisplacementMatrix:
         size_f3 = len(sorted_files(self.f3_dm))
         if size_f2 != size_f3:
             for file_name in sorted_files(self.f2_data):
-                file_path = get_file_path(self.f2_data, file_name)
-                output_file_path = get_file_path(self.f3_dm, file_name)
+                file_path = build_path(self.f2_data, file_name)
+                output_file_path = build_path(self.f3_dm, file_name)
                 df = pd.read_csv(file_path)
                 df = xy_adjustment(df)
                 matrix = pd.DataFrame(columns=self.columns)
