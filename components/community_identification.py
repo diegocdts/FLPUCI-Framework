@@ -1,5 +1,6 @@
 from components.deep_learning_model import FullConvolutionalAutoEncoder
 from components.federated_learning_model import FederatedFullConvolutionalAutoEncoder
+from components.validation import Validation
 from inner_types.data import Dataset
 from inner_types.learning import LearningApproach, FCAEProperties, TrainingParameters, WindowStrategy
 
@@ -19,6 +20,7 @@ class CommunityIdentification:
                  strategy: WindowStrategy):
         self.parameters = parameters
         self.strategy = strategy
+        self.validation = Validation(dataset, approach, strategy.type)
 
         if approach == LearningApproach.CEN:
             self.model = FullConvolutionalAutoEncoder(dataset, parameters, properties)
@@ -34,3 +36,5 @@ class CommunityIdentification:
             self.model.training(start_window, end_window)
 
             encodings, user_indexes = self.model.encoder_prediction(start_window=end_window, end_window=end_window + 1)
+
+            self.validation.generate_communities(interval=end_window, input_data=encodings, user_indexes=user_indexes)

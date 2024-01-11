@@ -21,7 +21,7 @@ class WindowStrategy:
 
     def __init__(self,
                  strategy_type: WindowStrategyType,
-                 window_size: int):
+                 window_size: int = None):
         self.type = strategy_type
         self.size = window_size
 
