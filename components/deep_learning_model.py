@@ -44,7 +44,7 @@ class FullConvolutionalAutoEncoder:
                                      callbacks=[self.checkpoint(path)],
                                      validation_data=(testing_data, testing_data))
             loss_handler.append(history.history['loss'], history.history['val_loss'])
-            loss_handler.save()
+            loss_handler.save_losses()
             del training_data, testing_data, loss_handler
 
     def encoder_prediction(self, start_window: int, end_window: int):
