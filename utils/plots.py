@@ -3,7 +3,32 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from inner_functions.names import sources
+from inner_types.learning import LearningApproach
 from inner_types.plots import FigSize, AxisLabel, FontSize, Legend
+
+
+def plot_losses(training_losses: np.array, testing_losses: np.array, approach: LearningApproach, path: str):
+    plt.figure(figsize=FigSize.DEFAULT.value)
+
+    plt.ylim([0.0, 0.1])
+    plt.yticks(np.arange(0, 0.11, 0.01), fontsize=FontSize.DEFAULT.value)
+    plt.ylabel(AxisLabel.LOSS.value, fontsize=FontSize.DEFAULT.value)
+
+    x_values = np.arange(1, len(training_losses) + 1)
+    plt.xticks(np.arange(0, len(training_losses) + 1), fontsize=FontSize.DEFAULT.value)
+
+    plt.plot(x_values, training_losses, '-', label='Training losses')
+    plt.plot(x_values, testing_losses, '--', label='Testing losses')
+    plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_2.value, fontsize=FontSize.DEFAULT.value)
+
+    if approach == LearningApproach.CEN:
+        plt.xlabel(AxisLabel.EPOCH.value, fontsize=FontSize.DEFAULT.value)
+    else:
+        plt.xlabel(AxisLabel.ROUND.value, fontsize=FontSize.DEFAULT.value)
+
+    plt.tight_layout()
+    plt.savefig(path)
+    plt.close()
 
 
 def plot_metric(dataframe: pd.DataFrame,
