@@ -126,7 +126,7 @@ class FederatedFullConvolutionalAutoEncoder:
                 loop.run_until_complete(self.state_manager.save(self.state, round_num))
 
                 loss_handler.append(round_iteration[1], self.model_evaluation(testing_data))
-                loss_handler.save()
+                loss_handler.save_losses()
 
             del training_data, testing_data, loss_handler
 
