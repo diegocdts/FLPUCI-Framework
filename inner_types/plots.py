@@ -2,11 +2,15 @@ from enum import Enum
 
 
 class FigSize(Enum):
-    REGULAR = (5.5, 6.5)
+    DEFAULT = (5.5, 6.5)
     WIDER = (8.5, 5)
 
 
 class AxisLabel(Enum):
+    LOSS = 'LOSS'
+    EPOCH = 'EPOCH'
+    ROUND = 'ROUND'
+
     K = 'CANDIDATE K'
     CONTACT_TIME = 'CONTACT TIME (IN SECONDS)'
     MSE = 'NORMALIZED MSE'
@@ -20,4 +24,5 @@ class FontSize(Enum):
 
 class Legend(Enum):
     BEST_LOCATION = 0
+    N_COLUMNS_2 = 2
     N_COLUMNS_3 = 3
