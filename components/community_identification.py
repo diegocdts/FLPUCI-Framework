@@ -38,3 +38,6 @@ class CommunityIdentification:
             encodings, user_indexes = self.model.encoder_prediction(start_window=end_window, end_window=end_window + 1)
 
             self.validation.generate_communities(interval=end_window, input_data=encodings, user_indexes=user_indexes)
+
+    def compare_window_strategies(self):
+        self.validation.compare_strategies()
