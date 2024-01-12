@@ -38,7 +38,7 @@ def plot_losses(training_losses: np.array, testing_losses: np.array, approach: L
 
 def plot_metric(dataframe: pd.DataFrame,
                 k_candidates: np.arange,
-                ks_chosen: list,
+                ks_chosen: np.array,
                 axis_label: AxisLabel,
                 file_path: str):
     plt.figure(figsize=FigSize.WIDER.value)
