@@ -9,3 +9,4 @@ framework = CommunityIdentification(dataset,
                                     parameters,
                                     strategy)
 framework.model_training(first_interval, last_interval)
+framework.compare_window_strategies()
