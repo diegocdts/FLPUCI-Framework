@@ -17,10 +17,11 @@ class CommunityIdentification:
                  approach: LearningApproach,
                  properties: FCAEProperties,
                  parameters: TrainingParameters,
-                 strategy: WindowStrategy):
+                 strategy: WindowStrategy,
+                 best_metric: bool):
         self.parameters = parameters
         self.strategy = strategy
-        self.validation = Validation(dataset, approach, strategy.type)
+        self.validation = Validation(dataset, approach, strategy.type, best_metric)
 
         if approach == LearningApproach.CEN:
             self.model = FullConvolutionalAutoEncoder(dataset, parameters, properties)
