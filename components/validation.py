@@ -93,7 +93,7 @@ def export_avg_ci(dataframe: pd.DataFrame,
                   csv_name: str,
                   png_name: str,
                   k_candidates: np.arange,
-                  ks_chosen: list,
+                  ks_chosen: np.array,
                   axis_label: AxisLabel):
     curve_dataframe = curve_dataframe_basis()
     for index, row in dataframe.iterrows():
@@ -129,7 +129,7 @@ class Validation:
         ari_dataframe = dataframe_basis()
 
         clustering = Clustering(input_data)
-        helper = ValidationHelper(interval)
+        helper = ValidationHelper(interval, path)
 
         best_metric_avg, best_k = 0, None  # the best metric must be contact_time or ssim or ari
 
@@ -185,8 +185,9 @@ class Validation:
 
 class ValidationHelper:
 
-    def __init__(self, interval: int):
+    def __init__(self, interval: int, path: str):
         self.interval = interval
+        self.path = path
         self.aic_list = []
         self.bic_list = []
         self.ks_chosen = None
@@ -203,4 +204,5 @@ class ValidationHelper:
         chosen_bic = self.bic_list[0][1]
         chosen_best = best_k
 
-        self.ks_chosen = [chosen_aic, chosen_bic, chosen_best]
+        self.ks_chosen = np.array([chosen_aic, chosen_bic, chosen_best])
+        np.savetxt(build_path(self.path, ExportedFiles.KS_CHOSEN.value), self.ks_chosen, delimiter=',', fmt='%d')
