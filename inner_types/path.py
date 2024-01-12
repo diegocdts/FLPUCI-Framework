@@ -55,5 +55,5 @@ class Path:
         return dir_exists_create('{}/f9_results/{}/{}/'.format(dataset, approach.value, strategy_type))
 
     @staticmethod
-    def f9_results_match(dataset: str, approach: LearningApproach):
-        return dir_exists_create('{}/f9_results/{}/strategies_match/'.format(dataset, approach.value))
+    def f9_results_compare_strategies(dataset: str, approach: LearningApproach):
+        return dir_exists_create('{}/f9_results/{}/strategy_comparison/'.format(dataset, approach.value))
