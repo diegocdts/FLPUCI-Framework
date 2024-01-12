@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+from matplotlib import colors as mcolors
 
 from inner_functions.names import sources
 from inner_types.learning import LearningApproach
@@ -8,14 +9,18 @@ from inner_types.plots import FigSize, AxisLabel, FontSize, Legend
 
 
 def plot_losses(training_losses: np.array, testing_losses: np.array, approach: LearningApproach, path: str):
-    plt.figure(figsize=FigSize.DEFAULT.value)
+    plt.figure(figsize=FigSize.WIDER.value)
 
     plt.ylim([0.0, 0.1])
     plt.yticks(np.arange(0, 0.11, 0.01), fontsize=FontSize.DEFAULT.value)
     plt.ylabel(AxisLabel.LOSS.value, fontsize=FontSize.DEFAULT.value)
 
+    steps = int(len(training_losses) / 10) if len(training_losses) >= 50 else int(len(training_losses) / 5)
+    if len(training_losses) <= 10:
+        steps = len(training_losses)
+
     x_values = np.arange(1, len(training_losses) + 1)
-    plt.xticks(np.arange(0, len(training_losses) + 1), fontsize=FontSize.DEFAULT.value)
+    plt.xticks(np.arange(0, len(training_losses) + 1, steps), fontsize=FontSize.DEFAULT.value)
 
     plt.plot(x_values, training_losses, '-', label='Training losses')
     plt.plot(x_values, testing_losses, '--', label='Testing losses')
@@ -70,14 +75,17 @@ def plot_metric(dataframe: pd.DataFrame,
     plt.plot(k_candidates, means, label=intra_community.capitalize())
     plt.fill_between(k_candidates, lower_bounds, upper_bounds, alpha=0.2)
 
+    plt.scatter(k_candidates[index_aic_choice], means[index_aic_choice], color=mcolors.TABLEAU_COLORS.get('tab:orange'))
     plt.text(k_candidates[index_aic_choice], means[index_aic_choice], f'AIC choice (k={ks_chosen[0]})',
-             verticalalignment='bottom', horizontalalignment='center', color='red')
+             verticalalignment='bottom', horizontalalignment='center')
 
+    plt.scatter(k_candidates[index_bic_choice], means[index_bic_choice], color=mcolors.TABLEAU_COLORS.get('tab:orange'))
     plt.text(k_candidates[index_bic_choice], means[index_bic_choice], f'BIC choice (k={ks_chosen[1]})',
-             verticalalignment='top', horizontalalignment='center', color='red')
+             verticalalignment='top', horizontalalignment='center')
 
+    plt.scatter(k_candidates[index_best_choice], means[index_best_choice], color=mcolors.TABLEAU_COLORS.get('tab:orange'))
     plt.text(k_candidates[index_best_choice], means[index_best_choice], f'Best choice  (k={ks_chosen[2]})',
-             verticalalignment='top', horizontalalignment='center', color='red')
+             verticalalignment='top', horizontalalignment='center')
 
     # inter_community curve
     inter_community = sources()[2]
@@ -87,6 +95,10 @@ def plot_metric(dataframe: pd.DataFrame,
 
     plt.plot(k_candidates, means, label=inter_community.capitalize())
     plt.fill_between(k_candidates, lower_bounds, upper_bounds, alpha=0.2)
+
+    plt.scatter(k_candidates[index_aic_choice], means[index_aic_choice], color=mcolors.TABLEAU_COLORS.get('tab:green'))
+    plt.scatter(k_candidates[index_bic_choice], means[index_bic_choice], color=mcolors.TABLEAU_COLORS.get('tab:green'))
+    plt.scatter(k_candidates[index_best_choice], means[index_best_choice], color=mcolors.TABLEAU_COLORS.get('tab:green'))
 
     plt.ylabel(axis_label.value, fontsize=FontSize.DEFAULT.value)
     plt.xlabel(AxisLabel.K.value, fontsize=FontSize.DEFAULT.value)
