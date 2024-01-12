@@ -39,7 +39,11 @@ def path_exists(path: str):
     return os.path.exists(path)
 
 
-def mkdir(dir_path:str):
+def mkdir(dir_path: str):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
     return dir_path
+
+
+def get_subdir_list(path):
+    return set(os.listdir(path))
