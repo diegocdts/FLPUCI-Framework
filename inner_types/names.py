@@ -15,3 +15,5 @@ class ExportedFiles(Enum):
     MSE_PNG = 'MSE.png'
     SSIM_PNG = 'SSIM.png'
     ARI_PNG = 'ARI.png'
+
+    KS_CHOSEN = 'ks_chosen.csv'
