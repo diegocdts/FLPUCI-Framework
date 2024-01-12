@@ -70,5 +70,6 @@ def arguments():
 
     first_interval = parsed.first_interval
     last_interval = parsed.last_interval
+    best_metric = parsed.best_metric
 
-    return dataset, approach, properties, parameters, strategy, first_interval, last_interval
+    return dataset, approach, properties, parameters, strategy, first_interval, last_interval, best_metric
