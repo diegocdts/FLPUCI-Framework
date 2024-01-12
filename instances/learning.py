@@ -21,4 +21,4 @@ ngsim_properties = FCAEProperties(input_shape=(4, 56, 1),
                                   learning_rate=0.002)
 
 fed_parameters = TrainingParameters(epochs=3, batch_size=2, shuffle_buffer=10, prefetch_buffer=-1, rounds=20)
-cen_parameters = TrainingParameters(epochs=1, batch_size=5)
+cen_parameters = TrainingParameters(epochs=150, batch_size=5)
