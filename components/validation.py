@@ -7,14 +7,14 @@ from sklearn.mixture import GaussianMixture
 
 from inner_functions.files import read_json
 from inner_functions.names import sources, column_k, curves
-from inner_functions.path import build_path, interval_dir, interval_json, metric_interval_json, mkdir
+from inner_functions.path import build_path, interval_dir, interval_json, metric_interval_json, mkdir, get_subdir_list
 from inner_types.data import Dataset
 from inner_types.learning import LearningApproach, WindowStrategyType
 from inner_types.names import ExportedFiles
 from inner_types.path import Path
 from inner_types.plots import AxisLabel
 from inner_types.validation import HeatmapMetric
-from utils.plots import plot_metric
+from utils.plots import plot_metric, plot_strategy_comparison
 
 
 def dataframe_basis():
@@ -114,12 +114,13 @@ class Validation:
 
     def __init__(self, dataset: Dataset, approach: LearningApproach, strategy_type: WindowStrategyType):
         self.dataset = dataset
-        self.type_learning = approach
+        self.approach = approach
         self.strategy_type = strategy_type
 
         self.f6_contact_time = Path.f6_contact_time(dataset.name)
         self.f7_metrics = Path.f7_metrics(dataset.name)
         self.f9_results = Path.f9_results(dataset.name, approach, strategy_type)
+        self.f9_results_compare_strategies = Path.f9_results_compare_strategies(dataset.name, approach)
 
     def generate_communities(self, interval: int, input_data: np.array, user_indexes: np.array):
         path = mkdir(build_path(self.f9_results, interval_dir(interval)))
@@ -181,6 +182,53 @@ class Validation:
         intra_community = intra_cluster_computation(dictionary, clusters, labels, user_indexes)
         inter_community = inter_cluster_computation(dictionary, clusters, labels, user_indexes)
         return [all_pairs, intra_community, inter_community]
+
+    def compare_strategies(self):
+        acc_results_path = Path.f9_results(self.dataset.name, self.approach, WindowStrategyType.ACC)
+        sli_results_path = Path.f9_results(self.dataset.name, self.approach, WindowStrategyType.SLI)
+
+        acc_subdir_list = get_subdir_list(acc_results_path)
+        sli_subdir_list = get_subdir_list(sli_results_path)
+
+        common_intervals = acc_subdir_list.intersection(sli_subdir_list)
+
+        csvs = [ExportedFiles.CONTACT_TIME_CSV, ExportedFiles.MSE_CSV, ExportedFiles.SSIM_CSV, ExportedFiles.ARI_CSV]
+        axis = [AxisLabel.CONTACT_TIME, AxisLabel.MSE, AxisLabel.SSIM, AxisLabel.ARI]
+        pngs = [ExportedFiles.CONTACT_TIME_PNG, ExportedFiles.MSE_PNG, ExportedFiles.SSIM_PNG, ExportedFiles.ARI_PNG]
+
+        for subdir in common_intervals:
+            path = mkdir(build_path(self.f9_results_compare_strategies, subdir))
+            acc_interval_path = build_path(acc_results_path, subdir)
+            sli_interval_path = build_path(sli_results_path, subdir)
+            acc_ks = np.loadtxt(build_path(acc_interval_path, ExportedFiles.KS_CHOSEN.value), delimiter=',', dtype=int)
+            sli_ks = np.loadtxt(build_path(sli_interval_path, ExportedFiles.KS_CHOSEN.value), delimiter=',', dtype=int)
+
+            # The acc_columns and sli_columns will be in the following order:
+            # aic_intra|aic_inter|bic_intra|bic_inter|best_intra|best_inter
+            acc_columns = []
+            sli_columns = []
+
+            for k in acc_ks:
+                acc_columns.append(f'{column_k(k)}|{sources()[1]}')
+                acc_columns.append(f'{column_k(k)}|{sources()[2]}')
+            for k in sli_ks:
+                sli_columns.append(f'{column_k(k)}|{sources()[1]}')
+                sli_columns.append(f'{column_k(k)}|{sources()[2]}')
+
+            for index, file in enumerate(csvs):
+                acc_dataframe = pd.read_csv(build_path(acc_interval_path, file.value), sep=',')
+                sli_dataframe = pd.read_csv(build_path(sli_interval_path, file.value), sep=',')
+
+                all_pairs_mean = acc_dataframe[sources()[0]].iloc[1]
+
+                acc_means = acc_dataframe[acc_columns].iloc[1].to_numpy()
+                sli_means = sli_dataframe[sli_columns].iloc[1].to_numpy()
+
+                plot_strategy_comparison(all_pairs_mean,
+                                         acc_means, sli_means,
+                                         acc_ks, sli_ks,
+                                         axis_label=axis[index],
+                                         path=build_path(path, pngs[index].value))
 
 
 class ValidationHelper:
