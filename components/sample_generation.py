@@ -39,17 +39,18 @@ def compare_samples_reconstructions(samples, reconstructions):
 
 def handle_pixels(pixels: np.array):
     """
-    Normalizes the heatmap pixels by the min and max values
+    Maps the heatmap pixels to the [0, 1] scale
     :param pixels: The pixels of a heatmap
-    :return: The normalized pixels of the heatmap
+    :return: The new pixels of the heatmap
     """
     if pixels.max() != pixels.min():
-        min_value = np.min(pixels)
-        max_value = np.max(pixels)
-        mapped_pixels = (pixels - min_value) / (max_value - min_value)
+        delta = pixels.max() - pixels.min()
+        pixels = np.absolute(pixels.astype("float64")) / delta
+        pixels = 1 - pixels
+        pixels = pixels + np.absolute(pixels.min())
     else:
-        mapped_pixels = np.absolute(pixels) * 0
-    return mapped_pixels
+        pixels = np.absolute(pixels) * 0
+    return pixels
 
 
 def reshape(samples: np.array):
