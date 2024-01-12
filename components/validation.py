@@ -235,6 +235,21 @@ class Validation:
                                          axis_label=axis[index],
                                          path=build_path(path, pngs[index].value))
 
+    def time_evolution(self):
+        acc_results_path = Path.f9_results(self.dataset.name, self.approach, WindowStrategyType.ACC)
+        sli_results_path = Path.f9_results(self.dataset.name, self.approach, WindowStrategyType.SLI)
+
+        csvs = [ExportedFiles.CONTACT_TIME_CSV, ExportedFiles.MSE_CSV, ExportedFiles.SSIM_CSV, ExportedFiles.ARI_CSV]
+        axis = [AxisLabel.CONTACT_TIME, AxisLabel.MSE, AxisLabel.SSIM, AxisLabel.ARI]
+        pngs = [ExportedFiles.CONTACT_TIME_PNG, ExportedFiles.MSE_PNG, ExportedFiles.SSIM_PNG, ExportedFiles.ARI_PNG]
+
+        for path in [acc_results_path, sli_results_path]:
+            subdir_list = get_subdir_list(path)
+
+            for subdir in subdir_list:
+                interval_path = build_path(path, subdir)
+                ks = np.loadtxt(build_path(path, ExportedFiles.KS_CHOSEN.value), delimiter=',', dtype=int)
+
 
 class ValidationHelper:
 
