@@ -39,6 +39,12 @@ def arguments():
                         default=3,
                         help='The size of the sli window strategy. Default 3')
 
+    parser.add_argument('--best_metric',
+                        type=bool,
+                        default=True,
+                        help='If True, the contact time is used as metric to generate the Best candidate. '
+                             'Otherwise, the SSIM will be used. Default True')
+
     parsed = parser.parse_args()
 
     properties = sfc_rt_properties
