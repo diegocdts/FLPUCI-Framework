@@ -80,12 +80,12 @@ def inter_cluster_computation(dictionary: dict, clusters: np.array, labels: np.a
     return all_inter_values
 
 
-def best_candidate(contact_time_dataframe: pd.DataFrame, k: int, best_contact_time_avg: float, best_k: int):
-    intra_contact_time_avg = contact_time_dataframe[contact_time_dataframe.columns[-1]][1].mean()
-    if intra_contact_time_avg > best_contact_time_avg:
-        return intra_contact_time_avg, k
+def best_candidate(best_metric_dataframe: pd.DataFrame, k: int, best_metric_avg: float, best_k: int):
+    intra_metric_avg = best_metric_dataframe[best_metric_dataframe.columns[-1]][1].mean()
+    if intra_metric_avg > best_metric_avg:
+        return intra_metric_avg, k
     else:
-        return best_contact_time_avg, best_k
+        return best_metric_avg, best_k
 
 
 def export_avg_ci(dataframe: pd.DataFrame,
@@ -131,10 +131,10 @@ class Validation:
         clustering = Clustering(input_data)
         helper = ValidationHelper(interval)
 
-        best_contact_time_avg, best_k = 0, None
+        best_metric_avg, best_k = 0, None  # the best metric must be contact_time or ssim or ari
 
         for k in self.dataset.k_candidates:
-            print(f'Validation in interval {interval} with k = {k}')
+            print(f'Validation at interval {interval} with k = {k}')
             clusters, labels, aic, bic = clustering.gmm(k)
             helper.append_score(k, aic, bic)
 
@@ -147,7 +147,7 @@ class Validation:
             ari_dataframe[column_k(k)] = self.metric_validation(interval, clusters, labels, user_indexes,
                                                                 HeatmapMetric.ARI)
 
-            best_contact_time_avg, best_k = best_candidate(contact_time_dataframe, k, best_contact_time_avg, best_k)
+            best_metric_avg, best_k = best_candidate(contact_time_dataframe, k, best_metric_avg, best_k)
 
         helper.sort_scores(best_k)
 
