@@ -57,3 +57,7 @@ class Path:
     @staticmethod
     def f9_results_compare_strategies(dataset: str, approach: LearningApproach):
         return dir_exists_create('{}/f9_results/{}/strategy_comparison/'.format(dataset, approach.value))
+
+    @staticmethod
+    def f9_results_time_evolution(dataset: str):
+        return dir_exists_create('{}/f9_results/time_evolution/'.format(dataset))
