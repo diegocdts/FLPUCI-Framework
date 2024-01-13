@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class LearningApproach(Enum):
-    CEN = 'Centralized'
     FED = 'FL-based'
+    CEN = 'Centralized'
 
     def __str__(self):
         return str(self.value)
