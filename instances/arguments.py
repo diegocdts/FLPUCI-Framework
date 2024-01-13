@@ -45,6 +45,11 @@ def arguments():
                         help='If True, the contact time is used as metric to generate the Best candidate. '
                              'Otherwise, the SSIM will be used. Default True')
 
+    parser.add_argument('--choice',
+                        type=str,
+                        default='best',
+                        help='The K choice to plot in the time evolution. It may be aic, bic or best. Default best.')
+
     parsed = parser.parse_args()
 
     properties = sfc_rt_properties
@@ -72,4 +77,11 @@ def arguments():
     last_interval = parsed.last_interval
     best_metric = parsed.best_metric
 
-    return dataset, approach, properties, parameters, strategy, first_interval, last_interval, best_metric
+    if parsed.choice == 'aic':
+        choice = 0
+    elif parsed.choice == 'bic':
+        choice = 1
+    else:
+        choice = 2
+
+    return dataset, approach, properties, parameters, strategy, first_interval, last_interval, best_metric, choice
