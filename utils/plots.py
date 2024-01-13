@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib import colors as mcolors
+from scipy import interpolate
 
 from inner_functions.names import sources, choice_method
 from inner_types.learning import LearningApproach
@@ -10,6 +11,30 @@ from inner_types.plots import FigSize, AxisLabel, FontSize, Legend
 
 def colors(color_name: str):
     return mcolors.TABLEAU_COLORS.get(f'tab:{color_name}')
+
+
+def y_tick_2decimal():
+    locs, labels = plt.yticks()
+    y_ticks = np.array([])
+    for idx in np.linspace(locs[0], locs[-1], num=5):
+        y_ticks = np.append(y_ticks, '{:.2f}'.format(idx))
+    plt.yticks(y_ticks.astype(float), fontsize=FontSize.DEFAULT.value)
+
+
+def bspline_plot(x: np.array, y: np.array):
+    x_values = np.linspace(int(x[0]), int(x[-1]), 100)
+    bspline = interpolate.make_interp_spline(x, y, 2)
+    y_values = bspline(x_values)
+    return x_values, y_values
+
+
+def fill_between(x_values, lower_bounds, means, upper_bounds, label):
+    x, lower_bounds = bspline_plot(x_values, lower_bounds)
+    x, means = bspline_plot(x_values, means)
+    x, upper_bounds = bspline_plot(x_values, upper_bounds)
+
+    plt.plot(x, means, label=label)
+    plt.fill_between(x, lower_bounds, upper_bounds, alpha=0.2)
 
 
 def plot_losses(training_losses: np.array, testing_losses: np.array, approach: LearningApproach, path: str):
@@ -35,6 +60,8 @@ def plot_losses(training_losses: np.array, testing_losses: np.array, approach: L
     else:
         plt.xlabel(AxisLabel.ROUND.value, fontsize=FontSize.DEFAULT.value)
 
+    y_tick_2decimal()
+
     plt.tight_layout()
     plt.savefig(path)
     plt.close()
@@ -44,7 +71,7 @@ def plot_metric(dataframe: pd.DataFrame,
                 k_candidates: np.arange,
                 ks_chosen: np.array,
                 axis_label: AxisLabel,
-                file_path: str):
+                path: str):
     plt.figure(figsize=FigSize.WIDER.value)
     columns = dataframe.columns  # columns[0]=sources; columns[1]=all_pairs; columns[2:]=k=2|intra_..k=N|inter_community
     index_of_inter = int((len(columns) / 2) + 1)
@@ -67,8 +94,7 @@ def plot_metric(dataframe: pd.DataFrame,
         means.append(dataframe[all_pairs][1])
         upper_bounds.append(dataframe[all_pairs][2])
 
-    plt.plot(k_candidates, means, label=all_pairs.capitalize())
-    plt.fill_between(k_candidates, lower_bounds, upper_bounds, alpha=0.2)
+    fill_between(k_candidates, lower_bounds, means, upper_bounds, all_pairs.capitalize())
 
     # intra_community curve
     intra_community = sources()[1]
@@ -76,8 +102,7 @@ def plot_metric(dataframe: pd.DataFrame,
     means = dataframe.iloc[1][intra_columns].to_numpy().astype(float)
     upper_bounds = dataframe.iloc[2][intra_columns].to_numpy().astype(float)
 
-    plt.plot(k_candidates, means, label=intra_community.capitalize())
-    plt.fill_between(k_candidates, lower_bounds, upper_bounds, alpha=0.2)
+    fill_between(k_candidates, lower_bounds, means, upper_bounds, intra_community.capitalize())
 
     plt.scatter(k_candidates[index_aic_choice], means[index_aic_choice], color=colors('orange'))
     plt.text(k_candidates[index_aic_choice], means[index_aic_choice], f'AIC choice (k={ks_chosen[0]})',
@@ -97,8 +122,7 @@ def plot_metric(dataframe: pd.DataFrame,
     means = dataframe.iloc[1][inter_columns].to_numpy().astype(float)
     upper_bounds = dataframe.iloc[2][inter_columns].to_numpy().astype(float)
 
-    plt.plot(k_candidates, means, label=inter_community.capitalize())
-    plt.fill_between(k_candidates, lower_bounds, upper_bounds, alpha=0.2)
+    fill_between(k_candidates, lower_bounds, means, upper_bounds, inter_community.capitalize())
 
     plt.scatter(k_candidates[index_aic_choice], means[index_aic_choice], color=colors('green'))
     plt.scatter(k_candidates[index_bic_choice], means[index_bic_choice], color=colors('green'))
@@ -108,9 +132,11 @@ def plot_metric(dataframe: pd.DataFrame,
     plt.xlabel(AxisLabel.K.value, fontsize=FontSize.DEFAULT.value)
     plt.xticks(k_candidates, fontsize=FontSize.DEFAULT.value)
     plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_3.value, fontsize=FontSize.DEFAULT.value)
-    plt.tight_layout()
 
-    plt.savefig(file_path)
+    y_tick_2decimal()
+
+    plt.tight_layout()
+    plt.savefig(path)
     plt.close()
 
 
@@ -160,6 +186,45 @@ def plot_strategy_comparison(all_pairs_mean: float,
     ax.set_xticklabels(labels, fontsize=FontSize.DEFAULT.value)
     ax.tick_params(axis='both', which='both', labelsize=FontSize.DEFAULT.value)
     ax.legend(loc=Legend.BEST_LOCATION.value, fontsize=FontSize.DEFAULT.value)
+
+    y_tick_2decimal()
+
+    plt.tight_layout()
+    plt.savefig(path)
+    plt.close()
+
+
+def plot_time_evolution(all_pairs: list,
+                        fed_intra: list,
+                        fed_inter: list,
+                        cen_intra: list,
+                        cen_inter: list,
+                        axis_label: AxisLabel,
+                        path: str):
+    plt.figure(figsize=FigSize.WIDER.value)
+    x_values = np.arange(1, len(all_pairs[0]) + 1)
+
+    curves = [all_pairs, fed_intra, fed_inter, cen_intra, cen_inter]
+    labels = [sources()[0],
+              f'{sources()[1]} - FL-based',
+              f'{sources()[2]} - FL-based',
+              f'{sources()[1]} - Centralized',
+              f'{sources()[2]} - Centralized']
+
+    for index, curve in enumerate(curves):
+        lower_bounds = curve[0]
+        means = curve[1]
+        upper_bounds = curve[2]
+
+        fill_between(x_values, lower_bounds, means, upper_bounds, labels[index].capitalize())
+
+    plt.ylabel(axis_label.value, fontsize=FontSize.DEFAULT.value)
+    plt.xlabel(AxisLabel.INTERVAL.value, fontsize=FontSize.DEFAULT.value)
+    plt.xticks(x_values, fontsize=FontSize.DEFAULT.value)
+    plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_2.value, fontsize=FontSize.DEFAULT.value)
+
+    y_tick_2decimal()
+
     plt.tight_layout()
     plt.savefig(path)
     plt.close()
