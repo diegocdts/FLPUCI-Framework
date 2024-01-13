@@ -43,5 +43,5 @@ class CommunityIdentification:
     def compare_window_strategies(self):
         self.validation.compare_strategies()
 
-    def time_evolution(self):
-        self.validation.time_evolution(self.strategy.type)
+    def time_evolution(self, choice_index):
+        self.validation.time_evolution(self.strategy.type, choice_index)
