@@ -11,3 +11,4 @@ framework = CommunityIdentification(dataset,
                                     best_metric)
 framework.model_training(first_interval, last_interval)
 framework.compare_window_strategies()
+framework.time_evolution()
