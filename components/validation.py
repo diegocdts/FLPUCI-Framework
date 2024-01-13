@@ -271,7 +271,7 @@ class Validation:
             cen_inter_means = []
             cen_inter_uppers = []
 
-            for subdir in common_intervals:
+            for subdir in sorted(common_intervals):
                 fed_interval_path = build_path(fed_results_path, subdir)
                 cen_interval_path = build_path(cen_results_path, subdir)
                 fed_ks = np.loadtxt(build_path(fed_interval_path, ExportedFiles.KS_CHOSEN.value), delimiter=',', dtype=int)
