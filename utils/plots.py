@@ -205,18 +205,18 @@ def plot_time_evolution(all_pairs: list,
     x_values = np.arange(1, len(all_pairs[0]) + 1)
 
     curves = [all_pairs, fed_intra, fed_inter, cen_intra, cen_inter]
-    labels = [sources()[0],
-              f'{sources()[1]} - FL-based',
-              f'{sources()[2]} - FL-based',
-              f'{sources()[1]} - Centralized',
-              f'{sources()[2]} - Centralized']
+    labels = [sources()[0].capitalize(),
+              f'{sources()[1].capitalize()} - FL-based',
+              f'{sources()[2].capitalize()} - FL-based',
+              f'{sources()[1].capitalize()} - Centralized',
+              f'{sources()[2].capitalize()} - Centralized']
 
     for index, curve in enumerate(curves):
         lower_bounds = curve[0]
         means = curve[1]
         upper_bounds = curve[2]
 
-        fill_between(x_values, lower_bounds, means, upper_bounds, labels[index].capitalize())
+        fill_between(x_values, lower_bounds, means, upper_bounds, labels[index])
 
     plt.ylabel(axis_label.value, fontsize=FontSize.DEFAULT.value)
     plt.xlabel(AxisLabel.INTERVAL.value, fontsize=FontSize.DEFAULT.value)
