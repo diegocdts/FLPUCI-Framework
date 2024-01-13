@@ -14,7 +14,7 @@ from inner_types.names import ExportedFiles
 from inner_types.path import Path
 from inner_types.plots import AxisLabel
 from inner_types.validation import HeatmapMetric
-from utils.plots import plot_metric, plot_strategy_comparison
+from utils.plots import plot_metric, plot_strategy_comparison, plot_time_evolution
 
 
 def dataframe_basis():
@@ -123,6 +123,7 @@ class Validation:
         self.f7_metrics = Path.f7_metrics(dataset.name)
         self.f9_results = Path.f9_results(dataset.name, approach, strategy_type)
         self.f9_results_compare_strategies = Path.f9_results_compare_strategies(dataset.name, approach)
+        self.f9_results_time_evolution = Path.f9_results_time_evolution(dataset.name)
 
     def generate_communities(self, interval: int, input_data: np.array, user_indexes: np.array):
         path = mkdir(build_path(self.f9_results, interval_dir(interval)))
@@ -235,20 +236,94 @@ class Validation:
                                          axis_label=axis[index],
                                          path=build_path(path, pngs[index].value))
 
-    def time_evolution(self):
-        acc_results_path = Path.f9_results(self.dataset.name, self.approach, WindowStrategyType.ACC)
-        sli_results_path = Path.f9_results(self.dataset.name, self.approach, WindowStrategyType.SLI)
+    def time_evolution(self, strategy_type: WindowStrategyType, choice_index: int = 2):
+        fed_results_path = Path.f9_results(self.dataset.name, LearningApproach.FED, strategy_type)
+        cen_results_path = Path.f9_results(self.dataset.name, LearningApproach.CEN, strategy_type)
+
+        fed_subdir_list = get_subdir_list(fed_results_path)
+        cen_subdir_list = get_subdir_list(cen_results_path)
+
+        common_intervals = fed_subdir_list.intersection(cen_subdir_list)
 
         csvs = [ExportedFiles.CONTACT_TIME_CSV, ExportedFiles.MSE_CSV, ExportedFiles.SSIM_CSV, ExportedFiles.ARI_CSV]
         axis = [AxisLabel.CONTACT_TIME, AxisLabel.MSE, AxisLabel.SSIM, AxisLabel.ARI]
         pngs = [ExportedFiles.CONTACT_TIME_PNG, ExportedFiles.MSE_PNG, ExportedFiles.SSIM_PNG, ExportedFiles.ARI_PNG]
 
-        for path in [acc_results_path, sli_results_path]:
-            subdir_list = get_subdir_list(path)
+        for index, file in enumerate(csvs):
 
-            for subdir in subdir_list:
-                interval_path = build_path(path, subdir)
-                ks = np.loadtxt(build_path(path, ExportedFiles.KS_CHOSEN.value), delimiter=',', dtype=int)
+            all_pairs_lowers = []
+            all_pairs_means = []
+            all_pairs_uppers = []
+
+            fed_intra_lowers = []
+            fed_intra_means = []
+            fed_intra_uppers = []
+
+            fed_inter_lowers = []
+            fed_inter_means = []
+            fed_inter_uppers = []
+
+            cen_intra_lowers = []
+            cen_intra_means = []
+            cen_intra_uppers = []
+
+            cen_inter_lowers = []
+            cen_inter_means = []
+            cen_inter_uppers = []
+
+            for subdir in common_intervals:
+                fed_interval_path = build_path(fed_results_path, subdir)
+                cen_interval_path = build_path(cen_results_path, subdir)
+                fed_ks = np.loadtxt(build_path(fed_interval_path, ExportedFiles.KS_CHOSEN.value), delimiter=',', dtype=int)
+                cen_ks = np.loadtxt(build_path(cen_interval_path, ExportedFiles.KS_CHOSEN.value), delimiter=',', dtype=int)
+                fed_k = fed_ks[choice_index]
+                cen_k = cen_ks[choice_index]
+
+                # The fed_columns and cen_columns will be in the following order:
+                # choice_intra|choice_inter
+                fed_columns = []
+                cen_columns = []
+
+                fed_columns.append(f'{column_k(fed_k)}|{sources()[1]}')
+                fed_columns.append(f'{column_k(fed_k)}|{sources()[2]}')
+                cen_columns.append(f'{column_k(cen_k)}|{sources()[1]}')
+                cen_columns.append(f'{column_k(cen_k)}|{sources()[2]}')
+
+                fed_dataframe = pd.read_csv(build_path(fed_interval_path, file.value), sep=',')
+                cen_dataframe = pd.read_csv(build_path(cen_interval_path, file.value), sep=',')
+
+                all_pairs_lowers.append(fed_dataframe[sources()[0]].iloc[0])
+                all_pairs_means.append(fed_dataframe[sources()[0]].iloc[1])
+                all_pairs_uppers.append(fed_dataframe[sources()[0]].iloc[2])
+
+                fed_dataframe = fed_dataframe[fed_columns]
+                cen_dataframe = cen_dataframe[cen_columns]
+
+                fed_intra_lowers.append(fed_dataframe[fed_columns[0]].iloc[0])
+                fed_intra_means.append(fed_dataframe[fed_columns[0]].iloc[1])
+                fed_intra_uppers.append(fed_dataframe[fed_columns[0]].iloc[2])
+
+                fed_inter_lowers.append(fed_dataframe[fed_columns[1]].iloc[0])
+                fed_inter_means.append(fed_dataframe[fed_columns[1]].iloc[1])
+                fed_inter_uppers.append(fed_dataframe[fed_columns[1]].iloc[2])
+
+                cen_intra_lowers.append(cen_dataframe[cen_columns[0]].iloc[0])
+                cen_intra_means.append(cen_dataframe[cen_columns[0]].iloc[1])
+                cen_intra_uppers.append(cen_dataframe[cen_columns[0]].iloc[2])
+
+                cen_inter_lowers.append(cen_dataframe[cen_columns[1]].iloc[0])
+                cen_inter_means.append(cen_dataframe[cen_columns[1]].iloc[1])
+                cen_inter_uppers.append(cen_dataframe[cen_columns[1]].iloc[2])
+
+            all_pairs = [all_pairs_lowers, all_pairs_means, all_pairs_uppers]
+            fed_intra = [fed_intra_lowers, fed_intra_means, fed_intra_uppers]
+            fed_inter = [fed_inter_lowers, fed_inter_means, fed_inter_uppers]
+            cen_intra = [cen_intra_lowers, cen_intra_means, cen_intra_uppers]
+            cen_inter = [cen_inter_lowers, cen_inter_means, cen_inter_uppers]
+
+            plot_time_evolution(all_pairs, fed_intra, fed_inter, cen_intra, cen_inter,
+                                axis_label=axis[index],
+                                path=build_path(self.f9_results_time_evolution, pngs[index].value))
 
 
 class ValidationHelper:
