@@ -3,7 +3,7 @@ from enum import Enum
 
 class FigSize(Enum):
     DEFAULT = (5.5, 6.5)
-    WIDER = (8.5, 5)
+    WIDER = (12, 6)
 
 
 class AxisLabel(Enum):
