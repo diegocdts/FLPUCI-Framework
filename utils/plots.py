@@ -33,7 +33,7 @@ def fill_between(x_values, lower_bounds, means, upper_bounds, label):
     x, means = bspline_plot(x_values, means)
     x, upper_bounds = bspline_plot(x_values, upper_bounds)
 
-    plt.plot(x, means, label=label)
+    plt.plot(x, means, label=label.replace('_', ' '))
     plt.fill_between(x, lower_bounds, upper_bounds, alpha=0.2)
 
 
@@ -106,15 +106,15 @@ def plot_metric(dataframe: pd.DataFrame,
 
     plt.scatter(k_candidates[index_aic_choice], means[index_aic_choice], color=colors('orange'))
     plt.text(k_candidates[index_aic_choice], means[index_aic_choice], f'AIC choice (k={ks_chosen[0]})',
-             verticalalignment='bottom', horizontalalignment='center')
+             verticalalignment='bottom', horizontalalignment='left')
 
     plt.scatter(k_candidates[index_bic_choice], means[index_bic_choice], color=colors('orange'))
     plt.text(k_candidates[index_bic_choice], means[index_bic_choice], f'BIC choice (k={ks_chosen[1]})',
-             verticalalignment='top', horizontalalignment='center')
+             verticalalignment='top', horizontalalignment='left')
 
     plt.scatter(k_candidates[index_best_choice], means[index_best_choice], color=colors('orange'))
     plt.text(k_candidates[index_best_choice], means[index_best_choice], f'Best choice  (k={ks_chosen[2]})',
-             verticalalignment='top', horizontalalignment='center')
+             verticalalignment='center', horizontalalignment='right')
 
     # inter_community curve
     inter_community = sources()[2]
@@ -158,7 +158,8 @@ def plot_strategy_comparison(all_pairs_mean: float,
     width = 0.1
 
     # all_pairs
-    plt.axhline(all_pairs_mean, linestyle='dashed', label=sources()[0].capitalize(), color=colors('blue'))
+    plt.axhline(all_pairs_mean, linestyle='dashed', label=sources()[0].replace('_', ' ').capitalize(),
+                color=colors('blue'))
 
     # intra_community
     intra_indexes = [0, 2, 4]
@@ -171,13 +172,13 @@ def plot_strategy_comparison(all_pairs_mean: float,
     sli_inter = sli_means[inter_indexes]
 
     ax.bar(x_values - (3 * width / 2), acc_intra, width, color=colors('orange'),
-           label='{} ACC'.format(sources()[1].capitalize()))
+           label='{} ACC'.format(sources()[1].replace('_', ' ').capitalize()))
     ax.bar(x_values - (1 * width / 2), acc_inter, width, color=colors('green'),
-           label='{} ACC'.format(sources()[2].capitalize()))
+           label='{} ACC'.format(sources()[2].replace('_', ' ').capitalize()))
     ax.bar(x_values + (1 * width / 2), sli_intra, width, color=colors('cyan'),
-           label='{} SLI'.format(sources()[1].capitalize()))
+           label='{} SLI'.format(sources()[1].replace('_', ' ').capitalize()))
     ax.bar(x_values + (3 * width / 2), sli_inter, width, color=colors('purple'),
-           label='{} SLI'.format(sources()[2].capitalize()))
+           label='{} SLI'.format(sources()[2].replace('_', ' ').capitalize()))
 
     ax.set_ylabel(axis_label.value, fontsize=FontSize.DEFAULT.value)
     ax.set_xlabel(AxisLabel.K.value, fontsize=FontSize.DEFAULT.value)
@@ -195,21 +196,37 @@ def plot_strategy_comparison(all_pairs_mean: float,
 
 
 def plot_time_evolution(all_pairs: list,
-                        fed_intra: list,
-                        fed_inter: list,
-                        cen_intra: list,
-                        cen_inter: list,
+                        fed_acc_intra: list,
+                        fed_acc_inter: list,
+                        fed_sli_intra: list,
+                        fed_sli_inter: list,
+                        cen_acc_intra: list,
+                        cen_acc_inter: list,
+                        cen_sli_intra: list,
+                        cen_sli_inter: list,
                         axis_label: AxisLabel,
                         path: str):
     plt.figure(figsize=FigSize.WIDER.value)
     x_values = np.arange(1, len(all_pairs[0]) + 1)
 
-    curves = [all_pairs, fed_intra, fed_inter, cen_intra, cen_inter]
+    curves = [all_pairs,
+              fed_acc_intra,
+              fed_sli_intra,
+              cen_acc_intra,
+              cen_sli_intra,
+              fed_acc_inter,
+              fed_sli_inter,
+              cen_acc_inter,
+              cen_sli_inter]
     labels = [sources()[0].capitalize(),
-              f'{sources()[1].capitalize()} - FL-based',
-              f'{sources()[2].capitalize()} - FL-based',
-              f'{sources()[1].capitalize()} - Centralized',
-              f'{sources()[2].capitalize()} - Centralized']
+              f'{sources()[1].capitalize()} - FL-based/ACC',
+              f'{sources()[1].capitalize()} - FL-based/SLI',
+              f'{sources()[1].capitalize()} - Centralized/ACC',
+              f'{sources()[1].capitalize()} - Centralized/SLI',
+              f'{sources()[2].capitalize()} - FL-based/ACC',
+              f'{sources()[2].capitalize()} - FL-based/SLI',
+              f'{sources()[2].capitalize()} - Centralized/ACC',
+              f'{sources()[2].capitalize()} - Centralized/SLI']
 
     for index, curve in enumerate(curves):
         lower_bounds = curve[0]
