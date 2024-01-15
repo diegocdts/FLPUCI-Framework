@@ -237,13 +237,19 @@ class Validation:
                                          path=build_path(path, pngs[index].value))
 
     def time_evolution(self, strategy_type: WindowStrategyType, choice_index: int = 2):
-        fed_results_path = Path.f9_results(self.dataset.name, LearningApproach.FED, strategy_type)
-        cen_results_path = Path.f9_results(self.dataset.name, LearningApproach.CEN, strategy_type)
+        fed_acc_results_path = Path.f9_results(self.dataset.name, LearningApproach.FED, WindowStrategyType.ACC)
+        fed_sli_results_path = Path.f9_results(self.dataset.name, LearningApproach.FED, WindowStrategyType.SLI)
+        cen_acc_results_path = Path.f9_results(self.dataset.name, LearningApproach.CEN, WindowStrategyType.ACC)
+        cen_sli_results_path = Path.f9_results(self.dataset.name, LearningApproach.CEN, WindowStrategyType.SLI)
 
-        fed_subdir_list = get_subdir_list(fed_results_path)
-        cen_subdir_list = get_subdir_list(cen_results_path)
+        fed_acc_subdir_list = get_subdir_list(fed_acc_results_path)
+        fed_sli_subdir_list = get_subdir_list(fed_sli_results_path)
+        cen_acc_subdir_list = get_subdir_list(cen_acc_results_path)
+        cen_sli_subdir_list = get_subdir_list(cen_sli_results_path)
 
-        common_intervals = fed_subdir_list.intersection(cen_subdir_list)
+        acc_common_intervals = fed_acc_subdir_list.intersection(cen_acc_subdir_list)
+        sli_common_intervals = fed_sli_subdir_list.intersection(cen_sli_subdir_list)
+        common_intervals = acc_common_intervals.intersection(sli_common_intervals)
 
         csvs = [ExportedFiles.CONTACT_TIME_CSV, ExportedFiles.MSE_CSV, ExportedFiles.SSIM_CSV, ExportedFiles.ARI_CSV]
         axis = [AxisLabel.CONTACT_TIME, AxisLabel.MSE, AxisLabel.SSIM, AxisLabel.ARI]
@@ -255,73 +261,130 @@ class Validation:
             all_pairs_means = []
             all_pairs_uppers = []
 
-            fed_intra_lowers = []
-            fed_intra_means = []
-            fed_intra_uppers = []
+            fed_acc_intra_lowers = []
+            fed_acc_intra_means = []
+            fed_acc_intra_uppers = []
 
-            fed_inter_lowers = []
-            fed_inter_means = []
-            fed_inter_uppers = []
+            fed_acc_inter_lowers = []
+            fed_acc_inter_means = []
+            fed_acc_inter_uppers = []
 
-            cen_intra_lowers = []
-            cen_intra_means = []
-            cen_intra_uppers = []
+            fed_sli_intra_lowers = []
+            fed_sli_intra_means = []
+            fed_sli_intra_uppers = []
 
-            cen_inter_lowers = []
-            cen_inter_means = []
-            cen_inter_uppers = []
+            fed_sli_inter_lowers = []
+            fed_sli_inter_means = []
+            fed_sli_inter_uppers = []
+
+            cen_acc_intra_lowers = []
+            cen_acc_intra_means = []
+            cen_acc_intra_uppers = []
+
+            cen_acc_inter_lowers = []
+            cen_acc_inter_means = []
+            cen_acc_inter_uppers = []
+
+            cen_sli_intra_lowers = []
+            cen_sli_intra_means = []
+            cen_sli_intra_uppers = []
+
+            cen_sli_inter_lowers = []
+            cen_sli_inter_means = []
+            cen_sli_inter_uppers = []
 
             for subdir in sorted(common_intervals):
-                fed_interval_path = build_path(fed_results_path, subdir)
-                cen_interval_path = build_path(cen_results_path, subdir)
-                fed_ks = np.loadtxt(build_path(fed_interval_path, ExportedFiles.KS_CHOSEN.value), delimiter=',', dtype=int)
-                cen_ks = np.loadtxt(build_path(cen_interval_path, ExportedFiles.KS_CHOSEN.value), delimiter=',', dtype=int)
-                fed_k = fed_ks[choice_index]
-                cen_k = cen_ks[choice_index]
+                fed_acc_interval_path = build_path(fed_acc_results_path, subdir)
+                fed_sli_interval_path = build_path(fed_sli_results_path, subdir)
+                cen_acc_interval_path = build_path(cen_acc_results_path, subdir)
+                cen_sli_interval_path = build_path(cen_sli_results_path, subdir)
+                fed_acc_ks = np.loadtxt(build_path(fed_acc_interval_path, ExportedFiles.KS_CHOSEN.value),
+                                        delimiter=',', dtype=int)
+                fed_sli_ks = np.loadtxt(build_path(fed_sli_interval_path, ExportedFiles.KS_CHOSEN.value),
+                                        delimiter=',', dtype=int)
+                cen_acc_ks = np.loadtxt(build_path(cen_acc_interval_path, ExportedFiles.KS_CHOSEN.value),
+                                        delimiter=',', dtype=int)
+                cen_sli_ks = np.loadtxt(build_path(cen_sli_interval_path, ExportedFiles.KS_CHOSEN.value),
+                                        delimiter=',', dtype=int)
+                fed_acc_k = fed_acc_ks[choice_index]
+                fed_sli_k = fed_sli_ks[choice_index]
+                cen_acc_k = cen_acc_ks[choice_index]
+                cen_sli_k = cen_sli_ks[choice_index]
 
                 # The fed_columns and cen_columns will be in the following order:
                 # choice_intra|choice_inter
-                fed_columns = []
-                cen_columns = []
+                fed_acc_columns = []
+                fed_sli_columns = []
+                cen_acc_columns = []
+                cen_sli_columns = []
 
-                fed_columns.append(f'{column_k(fed_k)}|{sources()[1]}')
-                fed_columns.append(f'{column_k(fed_k)}|{sources()[2]}')
-                cen_columns.append(f'{column_k(cen_k)}|{sources()[1]}')
-                cen_columns.append(f'{column_k(cen_k)}|{sources()[2]}')
+                fed_acc_columns.append(f'{column_k(int(fed_acc_k))}|{sources()[1]}')
+                fed_acc_columns.append(f'{column_k(int(fed_acc_k))}|{sources()[2]}')
+                fed_sli_columns.append(f'{column_k(int(fed_sli_k))}|{sources()[1]}')
+                fed_sli_columns.append(f'{column_k(int(fed_sli_k))}|{sources()[2]}')
+                cen_acc_columns.append(f'{column_k(int(cen_acc_k))}|{sources()[1]}')
+                cen_acc_columns.append(f'{column_k(int(cen_acc_k))}|{sources()[2]}')
+                cen_sli_columns.append(f'{column_k(int(cen_sli_k))}|{sources()[1]}')
+                cen_sli_columns.append(f'{column_k(int(cen_sli_k))}|{sources()[2]}')
 
-                fed_dataframe = pd.read_csv(build_path(fed_interval_path, file.value), sep=',')
-                cen_dataframe = pd.read_csv(build_path(cen_interval_path, file.value), sep=',')
+                fed_acc_dataframe = pd.read_csv(build_path(fed_acc_interval_path, file.value), sep=',')
+                fed_sli_dataframe = pd.read_csv(build_path(fed_sli_interval_path, file.value), sep=',')
+                cen_acc_dataframe = pd.read_csv(build_path(cen_acc_interval_path, file.value), sep=',')
+                cen_sli_dataframe = pd.read_csv(build_path(cen_sli_interval_path, file.value), sep=',')
 
-                all_pairs_lowers.append(fed_dataframe[sources()[0]].iloc[0])
-                all_pairs_means.append(fed_dataframe[sources()[0]].iloc[1])
-                all_pairs_uppers.append(fed_dataframe[sources()[0]].iloc[2])
+                all_pairs_lowers.append(fed_acc_dataframe[sources()[0]].iloc[0])
+                all_pairs_means.append(fed_acc_dataframe[sources()[0]].iloc[1])
+                all_pairs_uppers.append(fed_acc_dataframe[sources()[0]].iloc[2])
 
-                fed_dataframe = fed_dataframe[fed_columns]
-                cen_dataframe = cen_dataframe[cen_columns]
+                fed_acc_dataframe = fed_acc_dataframe[fed_acc_columns]
+                fed_sli_dataframe = fed_sli_dataframe[fed_sli_columns]
+                cen_acc_dataframe = cen_acc_dataframe[cen_acc_columns]
+                cen_sli_dataframe = cen_sli_dataframe[cen_sli_columns]
 
-                fed_intra_lowers.append(fed_dataframe[fed_columns[0]].iloc[0])
-                fed_intra_means.append(fed_dataframe[fed_columns[0]].iloc[1])
-                fed_intra_uppers.append(fed_dataframe[fed_columns[0]].iloc[2])
+                fed_acc_intra_lowers.append(fed_acc_dataframe[fed_acc_columns[0]].iloc[0])
+                fed_acc_intra_means.append(fed_acc_dataframe[fed_acc_columns[0]].iloc[1])
+                fed_acc_intra_uppers.append(fed_acc_dataframe[fed_acc_columns[0]].iloc[2])
 
-                fed_inter_lowers.append(fed_dataframe[fed_columns[1]].iloc[0])
-                fed_inter_means.append(fed_dataframe[fed_columns[1]].iloc[1])
-                fed_inter_uppers.append(fed_dataframe[fed_columns[1]].iloc[2])
+                fed_acc_inter_lowers.append(fed_acc_dataframe[fed_acc_columns[1]].iloc[0])
+                fed_acc_inter_means.append(fed_acc_dataframe[fed_acc_columns[1]].iloc[1])
+                fed_acc_inter_uppers.append(fed_acc_dataframe[fed_acc_columns[1]].iloc[2])
 
-                cen_intra_lowers.append(cen_dataframe[cen_columns[0]].iloc[0])
-                cen_intra_means.append(cen_dataframe[cen_columns[0]].iloc[1])
-                cen_intra_uppers.append(cen_dataframe[cen_columns[0]].iloc[2])
+                fed_sli_intra_lowers.append(fed_sli_dataframe[fed_sli_columns[0]].iloc[0])
+                fed_sli_intra_means.append(fed_sli_dataframe[fed_sli_columns[0]].iloc[1])
+                fed_sli_intra_uppers.append(fed_sli_dataframe[fed_sli_columns[0]].iloc[2])
 
-                cen_inter_lowers.append(cen_dataframe[cen_columns[1]].iloc[0])
-                cen_inter_means.append(cen_dataframe[cen_columns[1]].iloc[1])
-                cen_inter_uppers.append(cen_dataframe[cen_columns[1]].iloc[2])
+                fed_sli_inter_lowers.append(fed_sli_dataframe[fed_sli_columns[1]].iloc[0])
+                fed_sli_inter_means.append(fed_sli_dataframe[fed_sli_columns[1]].iloc[1])
+                fed_sli_inter_uppers.append(fed_sli_dataframe[fed_sli_columns[1]].iloc[2])
+
+                cen_acc_intra_lowers.append(cen_acc_dataframe[cen_acc_columns[0]].iloc[0])
+                cen_acc_intra_means.append(cen_acc_dataframe[cen_acc_columns[0]].iloc[1])
+                cen_acc_intra_uppers.append(cen_acc_dataframe[cen_acc_columns[0]].iloc[2])
+
+                cen_acc_inter_lowers.append(cen_acc_dataframe[cen_acc_columns[1]].iloc[0])
+                cen_acc_inter_means.append(cen_acc_dataframe[cen_acc_columns[1]].iloc[1])
+                cen_acc_inter_uppers.append(cen_acc_dataframe[cen_acc_columns[1]].iloc[2])
+
+                cen_sli_intra_lowers.append(cen_sli_dataframe[cen_sli_columns[0]].iloc[0])
+                cen_sli_intra_means.append(cen_sli_dataframe[cen_sli_columns[0]].iloc[1])
+                cen_sli_intra_uppers.append(cen_sli_dataframe[cen_sli_columns[0]].iloc[2])
+
+                cen_sli_inter_lowers.append(cen_sli_dataframe[cen_sli_columns[1]].iloc[0])
+                cen_sli_inter_means.append(cen_sli_dataframe[cen_sli_columns[1]].iloc[1])
+                cen_sli_inter_uppers.append(cen_sli_dataframe[cen_sli_columns[1]].iloc[2])
 
             all_pairs = [all_pairs_lowers, all_pairs_means, all_pairs_uppers]
-            fed_intra = [fed_intra_lowers, fed_intra_means, fed_intra_uppers]
-            fed_inter = [fed_inter_lowers, fed_inter_means, fed_inter_uppers]
-            cen_intra = [cen_intra_lowers, cen_intra_means, cen_intra_uppers]
-            cen_inter = [cen_inter_lowers, cen_inter_means, cen_inter_uppers]
+            fed_acc_intra = [fed_acc_intra_lowers, fed_acc_intra_means, fed_acc_intra_uppers]
+            fed_acc_inter = [fed_acc_inter_lowers, fed_acc_inter_means, fed_acc_inter_uppers]
+            fed_sli_intra = [fed_sli_intra_lowers, fed_sli_intra_means, fed_sli_intra_uppers]
+            fed_sli_inter = [fed_sli_inter_lowers, fed_sli_inter_means, fed_sli_inter_uppers]
+            cen_acc_intra = [cen_acc_intra_lowers, cen_acc_intra_means, cen_acc_intra_uppers]
+            cen_acc_inter = [cen_acc_inter_lowers, cen_acc_inter_means, cen_acc_inter_uppers]
+            cen_sli_intra = [cen_sli_intra_lowers, cen_sli_intra_means, cen_sli_intra_uppers]
+            cen_sli_inter = [cen_sli_inter_lowers, cen_sli_inter_means, cen_sli_inter_uppers]
 
-            plot_time_evolution(all_pairs, fed_intra, fed_inter, cen_intra, cen_inter,
+            plot_time_evolution(all_pairs, fed_acc_intra, fed_acc_inter, fed_sli_intra, fed_sli_inter,
+                                cen_acc_intra, cen_acc_inter, cen_sli_intra, cen_sli_inter,
                                 axis_label=axis[index],
                                 path=build_path(self.f9_results_time_evolution, pngs[index].value))
 
