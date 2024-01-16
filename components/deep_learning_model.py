@@ -40,6 +40,7 @@ class FullConvolutionalAutoEncoder:
                                      y=training_data,
                                      batch_size=self.parameters.batch_size,
                                      epochs=self.parameters.epochs,
+                                     shuffle=True,
                                      verbose=1,
                                      callbacks=[self.checkpoint(path)],
                                      validation_data=(testing_data, testing_data))
