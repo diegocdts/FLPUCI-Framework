@@ -149,11 +149,9 @@ class SampleHandler:
             intervals = intervals[start_window:end_window]
             for interval in intervals:
                 sample = np.array(interval.split(','), dtype="float64")
-                sample = min_max_scaling(sample)
-                sample = sample.reshape(self.dataset.width, self.dataset.height)
                 if sample.max() > sample.min():
-                    samples.append(sample)
-                elif add_empty:
+                    sample = min_max_scaling(sample)
+                    sample = sample.reshape(self.dataset.width, self.dataset.height)
                     samples.append(sample)
         samples = np.array(samples)
         return reshape(samples)
