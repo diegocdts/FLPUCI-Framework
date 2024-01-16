@@ -1,7 +1,9 @@
 from components.baseline_computation import compute_baseline
 from components.pre_processing import pre_processing
-from instances.data import rt
+from instances.arguments import arguments
 
-pre_processing(rt)
+dataset, approach, properties, parameters, strategy, first_interval, last_interval, best_metric, choice = arguments()
 
-compute_baseline(rt)
+pre_processing(dataset)
+
+compute_baseline(dataset)
