@@ -37,20 +37,17 @@ def compare_samples_reconstructions(samples, reconstructions):
             plt.show()
 
 
-def handle_pixels(pixels: np.array):
+def sigmoid(pixels: np.array):
     """
-    Maps the heatmap pixels to the [0, 1] scale
+    Applies the sigmoid function over the data to undo the logit transformation
     :param pixels: The pixels of a heatmap
     :return: The new pixels of the heatmap
     """
-    if pixels.max() != pixels.min():
-        delta = pixels.max() - pixels.min()
-        pixels = np.absolute(pixels.astype("float64")) / delta
-        pixels = 1 - pixels
-        pixels = pixels + np.absolute(pixels.min())
-    else:
-        pixels = np.absolute(pixels) * 0
-    return pixels
+    return 1 / (1 + np.exp(-pixels))
+
+
+def min_max_scaling(pixels: np.array):
+    return (pixels - pixels.min()) / (pixels.max() - pixels.min())
 
 
 def reshape(samples: np.array):
@@ -152,13 +149,13 @@ class SampleHandler:
             intervals = intervals[start_window:end_window]
             for interval in intervals:
                 sample = np.array(interval.split(','), dtype="float64")
-                sample = handle_pixels(sample)
+                sample = sigmoid(sample)
+                sample = min_max_scaling(sample)
                 sample = sample.reshape(self.dataset.width, self.dataset.height)
                 if sample.max() > sample.min():
                     samples.append(sample)
                 elif add_empty:
                     samples.append(sample)
-                del sample
         samples = np.array(samples)
         return reshape(samples)
 
