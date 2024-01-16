@@ -36,7 +36,7 @@ class CommunityIdentification:
 
             self.model.training(start_window, end_window)
 
-            encodings, user_indexes = self.model.encoder_prediction(start_window=end_window, end_window=end_window + 1)
+            encodings, user_indexes = self.model.encoder_prediction(start_window=end_window - 1, end_window=end_window)
 
             self.validation.generate_communities(interval=end_window, input_data=encodings, user_indexes=user_indexes)
 
