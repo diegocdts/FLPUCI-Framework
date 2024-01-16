@@ -149,7 +149,6 @@ class SampleHandler:
             intervals = intervals[start_window:end_window]
             for interval in intervals:
                 sample = np.array(interval.split(','), dtype="float64")
-                sample = sigmoid(sample)
                 sample = min_max_scaling(sample)
                 sample = sample.reshape(self.dataset.width, self.dataset.height)
                 if sample.max() > sample.min():
