@@ -1,4 +1,5 @@
 import tensorflow as tf
+from sklearn.model_selection import train_test_split
 
 from components.sample_generation import SampleHandler
 from inner_functions.path import build_path, path_exists, start_end_window_dir
@@ -34,19 +35,19 @@ class FullConvolutionalAutoEncoder:
             loss_handler.load()
             self.model.load_weights(build_path(path, 'cp.ckpt'))
         else:
-            training_data, training_indices_list = self.sample_handler.samples_as_list(start_window, end_window)
-            testing_data, testing_indices_list = self.sample_handler.samples_as_list(end_window, end_window + 1)
-            history = self.model.fit(x=training_data,
-                                     y=training_data,
+            training_data, user_indexes = self.sample_handler.samples_as_list(start_window, end_window)
+            train_x, val_x = train_test_split(training_data, random_state=32, test_size=0.2)
+            history = self.model.fit(x=train_x,
+                                     y=train_x,
                                      batch_size=self.parameters.batch_size,
                                      epochs=self.parameters.epochs,
                                      shuffle=True,
                                      verbose=1,
                                      callbacks=[self.checkpoint(path)],
-                                     validation_data=(testing_data, testing_data))
+                                     validation_data=(val_x, val_x))
             loss_handler.append(history.history['loss'], history.history['val_loss'])
             loss_handler.save_losses()
-            del training_data, testing_data, loss_handler
+            del training_data, val_x, loss_handler
 
     def encoder_prediction(self, start_window: int, end_window: int):
         samples, user_indexes = self.sample_handler.samples_as_list(start_window, end_window)
