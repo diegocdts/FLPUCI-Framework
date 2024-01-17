@@ -136,6 +136,7 @@ class CleaningData:
                                 self.set_min_lat_y_lon_x(lat_y, lon_x)
                                 lat_y, lon_x = self.convert_to_utm(lat_y, lon_x)
                                 file.write('{},{},{},{}\n'.format(interval_index, lon_x, lat_y, time))
+            self.lat_y_lon_x_adjustment()
 
     def set_min_lat_y_lon_x(self, lat_y: float, lon_x: float):
         """
@@ -285,7 +286,6 @@ def pre_processing(dataset: Dataset):
     """
     data = CleaningData(dataset)
     data.intervals_by_node()
-    data.lat_y_lon_x_adjustment()
 
     data = DisplacementMatrix(dataset)
     data.generate()
