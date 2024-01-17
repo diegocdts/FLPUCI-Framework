@@ -10,7 +10,7 @@ def arguments():
 
     parser.add_argument('--dataset',
                         type=str,
-                        default='rt',
+                        default='sfc',
                         help='The dataset identifier. It may be sfc (San Francisco Cabs),'
                              'rt (Roma Taxi) or ngsim (Next Generation Simulation). Default rt')
 
