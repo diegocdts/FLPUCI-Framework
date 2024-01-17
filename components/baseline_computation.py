@@ -10,6 +10,7 @@ from inner_types.data import Dataset
 from inner_types.path import Path
 from inner_types.validation import HeatmapMetric
 
+from itertools import product
 from skimage.metrics import mean_squared_error as f_mse, structural_similarity as f_ssim
 from sklearn.metrics.cluster import adjusted_rand_score as f_ari
 
@@ -182,12 +183,8 @@ class BaselineComputation:
                         add_dictionary_entry(contact_times, id_j, id_i, contact_time_value)
                     del aux_df
 
-                for index_i, series_i in file_df.iterrows():
-                    id_i = series_i.id
-                    aux_df = file_df[file_df.id != series_i.id]
-
-                    for index_j, series_j in aux_df.iterrows():
-                        id_j = series_j.id
+                for id_i, id_j in product(file_df.id, repeat=2):
+                    if id_i != id_j:
                         if contact_times.get(dictionary_key(id_i, id_j)) is None:
                             add_dictionary_entry(contact_times, id_i, id_j, 0.0)
                             add_dictionary_entry(contact_times, id_j, id_i, 0.0)
