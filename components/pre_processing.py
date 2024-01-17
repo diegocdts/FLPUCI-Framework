@@ -35,6 +35,21 @@ def time_unit_dict(epoch_size):
     return hour
 
 
+def min_adjustment(df: pd.DataFrame, min_lat_y: float, min_lon_x: float):
+    """
+    Adjusts the x and y so their values start from zero, i.e., their min value is zero
+    :param df: The dataframe with the load data
+    :param min_lat_y: The latitude/y coordinate
+    :param min_lon_x: The longitude/x coordinate
+    :return: The dataframe with the values adjusted
+    """
+    df['x'] -= min_lon_x
+    df['y'] -= min_lat_y
+    df['x'] = df['x'].round(decimals=2)
+    df['y'] = df['y'].round(decimals=2)
+    return df
+
+
 class CleaningData:
 
     def __init__(self, dataset: Dataset):
@@ -46,6 +61,8 @@ class CleaningData:
         self.f1_raw_data = Path.f1_raw_data(dataset.name)
         self.f2_data = Path.f2_data(dataset.name)
         self.header = 'interval,x,y,time\n'
+        self.min_lat_y = sys.float_info.max
+        self.min_lon_x = sys.float_info.max
 
     def line_split(self, line: str, splitter: str):
         """
@@ -115,23 +132,30 @@ class CleaningData:
 
                             if self.dataset.lat_y_min <= lat_y <= self.dataset.lat_y_max and \
                                     self.dataset.lon_x_min <= lon_x <= self.dataset.lon_x_max:
+
+                                self.set_min_lat_y_lon_x(lat_y, lon_x)
                                 lat_y, lon_x = self.convert_to_utm(lat_y, lon_x)
                                 file.write('{},{},{},{}\n'.format(interval_index, lon_x, lat_y, time))
 
+    def set_min_lat_y_lon_x(self, lat_y: float, lon_x: float):
+        """
+        Sets the min values for min_lat_y and min_lon_x
+        :param lat_y: The latitude/y coordinate
+        :param lon_x: The longitude/x coordinate
+        :return:
+        """
+        if lat_y < self.min_lat_y:
+            self.min_lat_y = lat_y
+        if lon_x < self.min_lon_x:
+            self.min_lon_x = lon_x
 
-def xy_adjustment(df: pd.DataFrame):
-    """
-    Adjusts the x and y so their values start from zero, i.e., their min value is zero
-    :param df: The dataframe with the load data
-    :return: The dataframe with the values adjusted
-    """
-    x_min = df['x'].min()
-    df['x'] -= x_min
-    y_min = df['y'].min()
-    df['y'] -= y_min
-    df['x'] = df['x'].round(decimals=2)
-    df['y'] = df['y'].round(decimals=2)
-    return df
+    def lat_y_lon_x_adjustment(self):
+        self.min_lat_y, self.min_lon_x = self.convert_to_utm(self.min_lat_y, self.min_lon_x)
+        for file_name in sorted_files(self.f2_data):
+            file_path = build_path(self.f2_data, file_name)
+            df = pd.read_csv(file_path)
+            df = min_adjustment(df, self.min_lat_y, self.min_lon_x)
+            df.to_csv(file_path, sep=',', index=False)
 
 
 def logit(normalized_cell_stay_time):
@@ -246,7 +270,6 @@ class DisplacementMatrix:
                 file_path = build_path(self.f2_data, file_name)
                 output_file_path = build_path(self.f3_dm, file_name)
                 df = pd.read_csv(file_path)
-                df = xy_adjustment(df)
                 matrix = pd.DataFrame(columns=self.columns)
                 matrix.to_csv(output_file_path, index=False)
                 for interval in range(0, self.max_interval + 1):
@@ -262,6 +285,7 @@ def pre_processing(dataset: Dataset):
     """
     data = CleaningData(dataset)
     data.intervals_by_node()
+    data.lat_y_lon_x_adjustment()
 
     data = DisplacementMatrix(dataset)
     data.generate()
