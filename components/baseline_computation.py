@@ -13,6 +13,8 @@ from inner_types.validation import HeatmapMetric
 from skimage.metrics import mean_squared_error as f_mse, structural_similarity as f_ssim
 from sklearn.metrics.cluster import adjusted_rand_score as f_ari
 
+dictionary_key = lambda i, j: f'{i}_{j}'
+
 
 def discrete_pixels(pixels: np.array):
     """
@@ -33,7 +35,7 @@ def add_dictionary_entry(dictionary, index_i, index_j, value):
     :param index_j: The index of the user j
     :param value: The value to be added
     """
-    key = f'{index_i}_{index_j}'
+    key = dictionary_key(index_i, index_j)
     if dictionary.get(key) is not None:
         value = dictionary.get(key) + value
     dictionary[key] = float(value)
@@ -142,7 +144,6 @@ class BaselineComputation:
                 df = pd.DataFrame(columns=['interval', 'id', 'cell', 'entry', 'exit'])
 
                 for file_index, file_name in enumerate(file_list):
-
                     file_path = build_path(self.f4_entry_exit, file_name)
                     cell_entry_exit = pd.read_csv(file_path)
                     cell_entry_exit = cell_entry_exit[cell_entry_exit.interval == interval]
@@ -171,14 +172,26 @@ class BaselineComputation:
                     aux_df = aux_df[aux_df.cell == series_i.cell]
                     aux_df = aux_df[aux_df.exit > series_i.entry]
                     aux_df = aux_df[aux_df.entry < series_i.exit]
+
                     for index_j, series_j in aux_df.iterrows():
                         id_j = series_j.id
                         last_entry = max(series_i.entry, series_j.entry)
                         first_exit = min(series_i.exit, series_j.exit)
                         contact_time_value = first_exit - last_entry
-                        add_dictionary_entry(contact_times, id_i, id_j, contact_time_value/2)
-                        add_dictionary_entry(contact_times, id_j, id_i, contact_time_value/2)
+                        add_dictionary_entry(contact_times, id_i, id_j, contact_time_value)
+                        add_dictionary_entry(contact_times, id_j, id_i, contact_time_value)
                     del aux_df
+
+                for index_i, series_i in file_df.iterrows():
+                    id_i = series_i.id
+                    aux_df = file_df[file_df.id != series_i.id]
+
+                    for index_j, series_j in aux_df.iterrows():
+                        id_j = series_j.id
+                        if contact_times.get(dictionary_key(id_i, id_j)) is None:
+                            add_dictionary_entry(contact_times, id_i, id_j, 0.0)
+                            add_dictionary_entry(contact_times, id_j, id_i, 0.0)
+
                 del file_df
                 export_dictionary(contact_times, output_file_path)
 
@@ -197,14 +210,16 @@ class BaselineComputation:
             if not path_exists(mse_output_path):
                 print(' > image_metrics:', interval)
                 samples = []
+                user_indexes = []
 
-                for file_name in sorted_files(self.f3_dm):
+                for index, file_name in enumerate(sorted_files(self.f3_dm)):
 
                     file_path = build_path(self.f3_dm, file_name)
 
                     samples_from_interval = self.sample_handler.get_samples(file_path, interval, interval + 1)
                     if len(samples_from_interval) > 0:
                         samples.append(samples_from_interval[0])
+                        user_indexes.append(index)
 
                 total_samples = len(samples)
                 if total_samples > 0:
@@ -213,14 +228,17 @@ class BaselineComputation:
                     ssim = {}
                     ari = {}
 
-                    for index_i, image_i in enumerate(samples):
+                    for i, index_i in enumerate(user_indexes):
+                        image_i = samples[i]
                         image_i = np.squeeze(image_i)
 
-                        for index_j, image_j in enumerate(samples):
-                            image_j = np.squeeze(image_j)
+                        for j, index_j in enumerate(user_indexes):
 
                             if index_i == index_j:
                                 continue
+
+                            image_j = samples[j]
+                            image_j = np.squeeze(image_j)
 
                             mse_value = f_mse(image_i, image_j)
                             add_dictionary_entry(mse, index_i, index_j, mse_value)
