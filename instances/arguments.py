@@ -22,7 +22,7 @@ def arguments():
     parser.add_argument('--last_interval',
                         type=int,
                         default=5,
-                        help='The index of the last interval to run experiments. Default 5')
+                        help='The total number of intervals for the experiment. Default 5')
 
     parser.add_argument('--approach',
                         type=str,
