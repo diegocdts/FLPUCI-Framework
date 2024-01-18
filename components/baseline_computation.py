@@ -149,7 +149,7 @@ class BaselineComputation:
                     cell_entry_exit = pd.read_csv(file_path)
                     cell_entry_exit = cell_entry_exit[cell_entry_exit.interval == interval]
                     cell_entry_exit['id'] = file_index
-                    df = df.append(cell_entry_exit)
+                    df = pd.concat([df, cell_entry_exit], ignore_index=True)
                 df.to_csv(output_file_path, index=False)
 
     def contact_time(self):
