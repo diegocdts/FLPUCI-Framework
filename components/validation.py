@@ -7,7 +7,8 @@ from sklearn.mixture import GaussianMixture
 
 from inner_functions.files import read_json
 from inner_functions.names import sources, column_k, curves
-from inner_functions.path import build_path, interval_dir, interval_json, metric_interval_json, mkdir, get_subdir_list
+from inner_functions.path import build_path, interval_dir, interval_json, metric_interval_json, mkdir, get_subdir_list, \
+    path_exists
 from inner_types.data import Dataset
 from inner_types.learning import LearningApproach, WindowStrategyType
 from inner_types.names import ExportedFiles
@@ -236,7 +237,7 @@ class Validation:
                                          axis_label=axis[index],
                                          path=build_path(path, pngs[index].value))
 
-    def time_evolution(self, strategy_type: WindowStrategyType, choice_index: int = 2):
+    def time_evolution(self, choice_index: int = 2):
         fed_acc_results_path = Path.f9_results(self.dataset.name, LearningApproach.FED, WindowStrategyType.ACC)
         fed_sli_results_path = Path.f9_results(self.dataset.name, LearningApproach.FED, WindowStrategyType.SLI)
         cen_acc_results_path = Path.f9_results(self.dataset.name, LearningApproach.CEN, WindowStrategyType.ACC)
@@ -246,6 +247,10 @@ class Validation:
         fed_sli_subdir_list = get_subdir_list(fed_sli_results_path)
         cen_acc_subdir_list = get_subdir_list(cen_acc_results_path)
         cen_sli_subdir_list = get_subdir_list(cen_sli_results_path)
+
+        if not path_exists(fed_acc_subdir_list) or not path_exists(fed_sli_subdir_list) \
+                or not path_exists(cen_acc_subdir_list) or not path_exists(cen_sli_subdir_list):
+            return
 
         acc_common_intervals = fed_acc_subdir_list.intersection(cen_acc_subdir_list)
         sli_common_intervals = fed_sli_subdir_list.intersection(cen_sli_subdir_list)
