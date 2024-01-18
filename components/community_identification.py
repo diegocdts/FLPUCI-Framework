@@ -31,7 +31,7 @@ class CommunityIdentification:
     def model_training(self, first_interval: int, last_interval: int):
         first_interval = adjust_first_interval(first_interval)
 
-        for end_window in range(first_interval, last_interval):
+        for end_window in range(first_interval, last_interval + 1):
             start_window = self.strategy.get_start_window(end_window)
 
             self.model.training(start_window, end_window)
