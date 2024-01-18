@@ -7,8 +7,7 @@ from sklearn.mixture import GaussianMixture
 
 from inner_functions.files import read_json
 from inner_functions.names import sources, column_k, curves
-from inner_functions.path import build_path, interval_dir, interval_json, metric_interval_json, mkdir, get_subdir_list, \
-    path_exists
+from inner_functions.path import build_path, interval_dir, interval_json, metric_interval_json, mkdir, get_subdir_list
 from inner_types.data import Dataset
 from inner_types.learning import LearningApproach, WindowStrategyType
 from inner_types.names import ExportedFiles
@@ -197,6 +196,12 @@ class Validation:
         acc_subdir_list = get_subdir_list(acc_results_path)
         sli_subdir_list = get_subdir_list(sli_results_path)
 
+        if not acc_subdir_list or not sli_subdir_list:
+            print('\n[INFO] To execute the compare_strategies function, it is mandatory to first perform the training '
+                  'and validation of the FL-based/ACC and FL-based/SLI or Centralized/ACC and Centralized/SLI '
+                  'combinations.\n')
+            return
+
         common_intervals = acc_subdir_list.intersection(sli_subdir_list)
 
         csvs = [ExportedFiles.CONTACT_TIME_CSV, ExportedFiles.MSE_CSV, ExportedFiles.SSIM_CSV, ExportedFiles.ARI_CSV]
@@ -248,8 +253,9 @@ class Validation:
         cen_acc_subdir_list = get_subdir_list(cen_acc_results_path)
         cen_sli_subdir_list = get_subdir_list(cen_sli_results_path)
 
-        if not path_exists(fed_acc_subdir_list) or not path_exists(fed_sli_subdir_list) \
-                or not path_exists(cen_acc_subdir_list) or not path_exists(cen_sli_subdir_list):
+        if not fed_acc_subdir_list or not fed_sli_subdir_list or not cen_acc_subdir_list or not cen_sli_subdir_list:
+            print('\n[INFO] To execute the time_evolution function, it is mandatory to first perform the training and '
+                  'validation of the FL-based/ACC, FL-based/SLI, Centralized/ACC and Centralized/SLI combinations.\n')
             return
 
         acc_common_intervals = fed_acc_subdir_list.intersection(cen_acc_subdir_list)
