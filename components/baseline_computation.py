@@ -95,6 +95,7 @@ class BaselineComputation:
 
             with open(file_path) as input_file:
                 file_lines = input_file.readlines()[1:]
+                new_lines = "interval,cell,entry,exit\n"
 
                 if len(file_lines) > 0:
 
@@ -106,7 +107,6 @@ class BaselineComputation:
                     previous_cell = (x_index * self.dataset.height) + y_index
 
                     entry_cell, exit_cell = int(first_line[3]), int(first_line[3])
-                    new_lines = "interval,cell,entry,exit\n"
 
                     for line in file_lines:
                         split = line.split(',')
@@ -122,8 +122,8 @@ class BaselineComputation:
                             entry_cell = time
                         exit_cell = time
                     new_lines += f'{previous_interval},{previous_cell},{entry_cell},{exit_cell}\n'
-                    with open(output_file_path, 'w') as output_file:
-                        output_file.write(new_lines)
+                with open(output_file_path, 'w') as output_file:
+                    output_file.write(new_lines)
 
     def interval_entry_exit(self):
         """
