@@ -28,11 +28,15 @@ class FederatedDataHandler:
 
     def preprocess(self, dataset):
 
+        batch_size = self.parameters.batch_size
+        if len(dataset) < batch_size:
+            batch_size = len(dataset)
+
         def batch_format_fn(element):
             return collections.OrderedDict(x=element, y=element)
 
         return dataset.repeat(self.parameters.epochs).shuffle(self.parameters.shuffle_buffer).batch(
-            self.parameters.batch_size).map(batch_format_fn).prefetch(self.parameters.prefetch_buffer)
+            batch_size).map(batch_format_fn).prefetch(self.parameters.prefetch_buffer)
 
     def element_spec_build(self):
         single_user_dataset = tf.data.Dataset.from_tensor_slices(self.sample_handler.random_dataset())
