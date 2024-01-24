@@ -185,4 +185,6 @@ class SampleHandler:
             single_dataset = self.get_samples(file_path, 0, 1, add_empty=True)
             return single_dataset
         dataset = get_random()
+        while len(dataset) < 1:
+            dataset = get_random()
         return dataset
