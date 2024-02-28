@@ -171,27 +171,33 @@ def logit(normalized_cell_stay_time):
     return arr_logit
 
 
-def normalize_cell_stay_time(cell_stay_time: np.array, time_in_trace: int):
+def normalize_cell_stay_time(cell_stay_time: np.array, time_in_trace: int, apply_logit: bool):
     """
     Normalize the node's stay time in cells by its max time in trace
     :param cell_stay_time: The list of stay time in cells
     :param time_in_trace: Max time of a node in trace
+    :param apply_logit: Bool that indicates whether to apply the logit transformation or not
     :return: A string with the transformed stay time in cells to write in file
     """
     time_in_trace = max(1, time_in_trace)
-    cells_stay_time_logit = logit(cell_stay_time / time_in_trace)
-    cells_stay_time_str = ', '.join(['{:.3f}'.format(item) for item in cells_stay_time_logit]) + '\n'
+    if apply_logit:
+        new_cell_stay_time = logit(cell_stay_time / time_in_trace)
+    else:
+        new_cell_stay_time = cell_stay_time / time_in_trace
+    cells_stay_time_str = ', '.join(['{:.3f}'.format(item) for item in new_cell_stay_time]) + '\n'
     return cells_stay_time_str
 
 
 class DisplacementMatrix:
 
-    def __init__(self, dataset: Dataset):
+    def __init__(self, dataset: Dataset, apply_logit: bool):
         """
         Creates the Displacement Matrix where each row is a heatmap and each row index is an interval
         :param dataset: A Dataset object
+        :param apply_logit: Bool that indicates whether to apply the logit transformation or not
         """
         self.dataset = dataset
+        self.apply_logit = apply_logit
         self.f2_data = Path.f2_data(dataset.name)
         self.f3_dm = Path.f3_dm(dataset.name)
         self.max_interval = self.get_max_interval()
@@ -256,7 +262,7 @@ class DisplacementMatrix:
 
             time_in_trace = max_in_trace - min_in_trace
         # appends feature_row at the matrix
-        new_row = normalize_cell_stay_time(cell_stay_time, time_in_trace)
+        new_row = normalize_cell_stay_time(cell_stay_time, time_in_trace, self.apply_logit)
         output_file = open(output_file_path, 'a')
         output_file.write(new_row)
 
@@ -279,13 +285,14 @@ class DisplacementMatrix:
                     self.fill_matrix(copy, output_file_path)
 
 
-def pre_processing(dataset: Dataset):
+def pre_processing(dataset: Dataset, apply_logit: bool):
     """
     Runs the CleaningData and DisplacementMatrix scripts for a dataset
     :param dataset: The Dataset object
+    :param apply_logit: Bool that indicates whether to apply the logit transformation or not
     """
     data = CleaningData(dataset)
     data.intervals_by_node()
 
-    data = DisplacementMatrix(dataset)
+    data = DisplacementMatrix(dataset, apply_logit)
     data.generate()

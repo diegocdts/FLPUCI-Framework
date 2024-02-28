@@ -1,14 +1,14 @@
 from components.community_identification import CommunityIdentification
 from instances.arguments import arguments
 
-dataset, approach, properties, parameters, strategy, first_interval, last_interval, best_metric, choice = arguments()
+args = arguments()
 
-framework = CommunityIdentification(dataset,
-                                    approach,
-                                    properties,
-                                    parameters,
-                                    strategy,
-                                    best_metric)
-framework.model_training(first_interval, last_interval)
+framework = CommunityIdentification(args.dataset,
+                                    args.approach,
+                                    args.properties,
+                                    args.parameters,
+                                    args.strategy,
+                                    args.best_metric)
+framework.model_training(args.first_interval, args.last_interval)
 framework.compare_window_strategies()
-framework.time_evolution(choice)
+framework.time_evolution(args.choice)

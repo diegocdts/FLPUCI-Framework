@@ -1,4 +1,5 @@
 import argparse
+from collections import namedtuple
 
 from inner_types.learning import LearningApproach, WindowStrategy, WindowStrategyType
 from instances.data import sfc, rt, ngsim
@@ -13,6 +14,11 @@ def arguments():
                         default='sfc',
                         help='The dataset identifier. It may be sfc (San Francisco Cabs),'
                              'rt (Roma Taxi) or ngsim (Next Generation Simulation). Default rt')
+
+    parser.add_argument('--apply_logit',
+                        type=bool,
+                        default=False,
+                        help='If True, the logit transformation is applied to the DisplacementMatrix. Default True')
 
     parser.add_argument('--first_interval',
                         type=int,
@@ -75,7 +81,8 @@ def arguments():
 
     first_interval = parsed.first_interval
     last_interval = parsed.last_interval
-    best_metric = parsed.best_metric
+    best_metric = parsed.best_metric == 'True'
+    apply_logit = parsed.apply_logit == 'True'
 
     if parsed.choice == 'aic':
         choice = 0
@@ -84,4 +91,9 @@ def arguments():
     else:
         choice = 2
 
-    return dataset, approach, properties, parameters, strategy, first_interval, last_interval, best_metric, choice
+    args = namedtuple('args',
+                      ['dataset', 'apply_logit', 'approach', 'properties', 'parameters', 'strategy', 'first_interval',
+                       'last_interval', 'best_metric', 'choice'])
+
+    return args(dataset, apply_logit, approach, properties, parameters, strategy, first_interval, last_interval,
+                best_metric, choice)
