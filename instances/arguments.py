@@ -17,7 +17,7 @@ def arguments():
 
     parser.add_argument('--apply_logit',
                         type=bool,
-                        default=False,
+                        default=True,
                         help='If True, the logit transformation is applied to the DisplacementMatrix. Default True')
 
     parser.add_argument('--first_interval',
