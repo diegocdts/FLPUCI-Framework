@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -244,4 +246,48 @@ def plot_time_evolution(all_pairs: list,
 
     plt.tight_layout()
     plt.savefig(path)
+    plt.close()
+
+
+def plot_losses_hyperparameters(path: str):
+    files = [file for file in sorted(os.listdir(path), reverse=True) if file.endswith('csv')]
+
+    plt.figure(figsize=FigSize.WIDER.value)
+
+    minimum = 1
+    maximum = 0
+
+    for file in files:
+        label = file.replace('.csv', '')
+        data = np.loadtxt(f'{path}/{file}', delimiter=',')
+
+        if data.min() < minimum:
+            minimum = data.min()
+        if data.max() > maximum:
+            maximum = data.max()
+
+        steps = int(len(data) / 10) if len(data) >= 50 else int(len(data) / 5)
+        if len(data) <= 10:
+            steps = len(data)
+
+        x_values = np.arange(1, len(data) + 1)
+        plt.xticks(np.arange(0, len(data) + 1, steps), fontsize=FontSize.DEFAULT.value)
+
+        plt.plot(x_values, data, label=label)
+
+    minimum = max(0.0, minimum - 0.01)
+    maximum = maximum + 0.01
+
+    plt.ylim([minimum, maximum])
+    plt.yticks(np.arange(minimum, maximum, 0.01), fontsize=FontSize.DEFAULT.value)
+    plt.ylabel(AxisLabel.LOSS.value, fontsize=FontSize.DEFAULT.value)
+
+    plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_2.value, fontsize=FontSize.DEFAULT.value)
+
+    plt.xlabel(AxisLabel.ROUND.value, fontsize=FontSize.DEFAULT.value)
+
+    y_tick_2decimal()
+
+    plt.tight_layout()
+    plt.savefig(f'{path}/losses hyperparameter.png')
     plt.close()
