@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import kendalltau
+from scipy.stats import kendalltau, spearmanr
 
 from components.sample_generation import min_max_scaling
 from inner_functions.path import sorted_files, build_path
@@ -26,12 +26,12 @@ def get_sample(file_path: str, interval: int):
             return None
 
 
-def heatmap_matrix(matrix_pearson: np.array, matrix_kendaltau: np.array):
+def heatmap_matrix(matrix_spearman: np.array, matrix_kendaltau: np.array):
     fig, axs = plt.subplots(1, 2, figsize=(14, 6))
 
     # Plotar heatmap para a matriz de correlação de Pearson
-    im1 = axs[0].imshow(matrix_pearson, cmap='viridis', interpolation='nearest', vmin=matrix_pearson.min(), vmax=1)
-    axs[0].set_title('Matriz de Correlação - Pearson')
+    im1 = axs[0].imshow(matrix_spearman, cmap='viridis', interpolation='nearest', vmin=matrix_spearman.min(), vmax=1)
+    axs[0].set_title('Matriz de Correlação - Spearman')
     fig.colorbar(im1, ax=axs[0], label='Correlação')
 
     # Plotar heatmap para a matriz de correlação de Kendall-Tau
@@ -89,7 +89,7 @@ def most_correlated(matrix: np.array):
           f'Entre -0.50 e -0.75: {n75} ({percent(n75)})\nEntre -0.75 e -1: {n1} ({percent(n1)})\n--')
 
     mean_correlation = np.mean(correlations)
-    print(f'A correlação média é de {mean_correlation}\n')
+    print(f'A correlação média é de {mean_correlation}\n------------')
 
 
 class SampleAnalysis:
@@ -116,6 +116,18 @@ class SampleAnalysis:
         print('Pearson Correlation')
         most_correlated(pearson_correlation_matrix)
         return pearson_correlation_matrix
+
+    def spearman_correlation_at_interval(self):
+        variables = len(self.data)
+        spearman_correlation_matrix = np.zeros((variables, variables))
+
+        for i in range(variables):
+            for j in range(variables):
+                spearman_correlation_matrix[i, j], _ = spearmanr(self.data[i], self.data[j])
+
+        print('Spearman Correlation')
+        most_correlated(spearman_correlation_matrix)
+        return spearman_correlation_matrix
 
     def kendaltau_correlation_at_interval(self):
         variables = len(self.data)
