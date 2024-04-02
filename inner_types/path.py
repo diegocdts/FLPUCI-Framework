@@ -61,3 +61,7 @@ class Path:
     @staticmethod
     def f9_results_time_evolution(dataset: str):
         return dir_exists_create('{}/f9_results/time_evolution/'.format(dataset))
+
+    @staticmethod
+    def f9_results_analysis(dataset: str):
+        return dir_exists_create('{}/f9_results/analysis/'.format(dataset))

@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -28,12 +30,14 @@ def bspline_plot(x: np.array, y: np.array):
     return x_values, y_values
 
 
-def fill_between(x_values, lower_bounds, means, upper_bounds, label):
+def fill_between(x_values, lower_bounds, means, upper_bounds, label, kwargs=None):
     x, lower_bounds = bspline_plot(x_values, lower_bounds)
     x, means = bspline_plot(x_values, means)
     x, upper_bounds = bspline_plot(x_values, upper_bounds)
 
-    plt.plot(x, means, label=label.replace('_', ' '))
+    kwargs = {} if kwargs is None else kwargs
+
+    plt.plot(x, means, label=label.replace('_', ' '), **kwargs)
     plt.fill_between(x, lower_bounds, upper_bounds, alpha=0.2)
 
 
@@ -241,6 +245,126 @@ def plot_time_evolution(all_pairs: list,
     plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_2.value, fontsize=FontSize.DEFAULT.value)
 
     y_tick_2decimal()
+
+    plt.tight_layout()
+    plt.savefig(path)
+    plt.close()
+
+
+def plot_losses_hyperparameters(path: str):
+    files = [file for file in sorted(os.listdir(path), reverse=True) if file.endswith('csv')]
+
+    plt.figure(figsize=FigSize.SQUARE.value)
+
+    minimum = 1
+    maximum = 0
+
+    for file in files:
+        label = file.replace('.csv', '').replace(' losses', '')
+        data = np.loadtxt(f'{path}/{file}', delimiter=',')
+
+        if data.min() < minimum:
+            minimum = data.min()
+        if data.max() > maximum:
+            maximum = data.max()
+
+        steps = int(len(data) / 10) if len(data) >= 50 else 5
+        if len(data) <= 10:
+            steps = len(data)
+
+        x_values = np.arange(1, len(data) + 1)
+        plt.xticks(np.arange(0, len(data) + 1, steps), fontsize=FontSize.DEFAULT.value)
+
+        plt.plot(x_values, data, linewidth=2.5, label=label)
+
+    minimum = max(0.0, minimum - 0.01)
+    maximum = maximum + 0.01
+
+    plt.ylim([minimum, maximum])
+    plt.yticks(np.arange(minimum, maximum, 0.01), fontsize=FontSize.DEFAULT.value)
+    plt.ylabel(AxisLabel.LOSS.value, fontsize=FontSize.DEFAULT.value)
+
+    plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_2.value, fontsize=FontSize.DEFAULT.value)
+
+    plt.xlabel(AxisLabel.ROUND.value, fontsize=FontSize.DEFAULT.value)
+
+    y_tick_2decimal()
+
+    plt.tight_layout()
+    plt.savefig(f'{path}/losses hyperparameter.png')
+    plt.close()
+
+
+def plot_avg_correlations(pearson_means, pearson_ci, spearman_means, spearman_ci, kendal_means, kendal_ci, path):
+    def plot_type_correlation(means, ci, label, kwargs):
+        lower_bounds = []
+        upper_bounds = []
+        for ci_tuple in ci:
+            lower_bounds.append(ci_tuple[0])
+            upper_bounds.append(ci_tuple[1])
+        fill_between(intervals, lower_bounds, means, upper_bounds, label=label, kwargs=kwargs)
+
+    plt.figure(figsize=FigSize.WIDER.value)
+    intervals = np.arange(1, len(pearson_means) + 1)
+
+    plot_type_correlation(pearson_means, pearson_ci, 'Pearson',
+                          kwargs={'color': colors('blue'), 'linestyle': 'dashdot', 'linewidth': 2})
+    plot_type_correlation(spearman_means, spearman_ci, 'Spearman',
+                          kwargs={'color': colors('red'), 'linestyle': 'solid', 'linewidth': 2})
+    plot_type_correlation(kendal_means, kendal_ci, 'Kendal',
+                          kwargs={'color': colors('green'), 'linestyle': 'dashed', 'linewidth': 2})
+
+    plt.ylabel(AxisLabel.MEAN_CORRELATION.value, fontsize=FontSize.DEFAULT.value)
+    plt.xlabel(AxisLabel.INTERVAL.value, fontsize=FontSize.DEFAULT.value)
+    plt.xticks(intervals, fontsize=FontSize.DEFAULT.value)
+    plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_3.value, fontsize=FontSize.DEFAULT.value)
+
+    y_tick_2decimal()
+
+    plt.tight_layout()
+    plt.savefig(path)
+    plt.close()
+
+
+def plot_correlations(pearson_matrix, pearson_mean, spearman_matrix, spearman_mean, kendal_matrix, kendal_mean, path):
+    plt.figure(figsize=FigSize.WIDER.value)
+    pairs_index = np.arange(1, len(pearson_matrix.flatten()) + 1)
+
+    plt.scatter(pairs_index, pearson_matrix.flatten(), s=0.75, color=colors('blue'))
+    plt.scatter(pairs_index, spearman_matrix.flatten(), s=0.75, color=colors('red'))
+    plt.scatter(pairs_index, kendal_matrix.flatten(), s=0.72, color=colors('green'))
+
+    plt.axhline(pearson_mean, color=colors('blue'), label='Pearson', linestyle='dashdot', linewidth=2)
+    plt.axhline(spearman_mean, color=colors('red'), label='Spearman', linestyle='solid', linewidth=2)
+    plt.axhline(kendal_mean, color=colors('green'), label='Kendal', linestyle='dashed', linewidth=2)
+
+    plt.ylim(top=1)
+    plt.ylabel(AxisLabel.CORRELATION.value, fontsize=FontSize.DEFAULT.value)
+    plt.xlabel(AxisLabel.PAIR_INDEX.value, fontsize=FontSize.DEFAULT.value)
+    plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+    plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_3.value, fontsize=FontSize.DEFAULT.value)
+
+    y_tick_2decimal()
+
+    plt.tight_layout()
+    plt.savefig(path)
+    plt.close()
+
+
+def heatmap_matrix_correlation(matrix_pearson: np.array, matrix_spearman: np.array, matrix_kendal: np.array, path):
+    fig, axs = plt.subplots(1, 3, figsize=(14, 6))
+
+    im1 = axs[0].imshow(matrix_pearson, cmap='viridis', interpolation='nearest')
+    axs[0].set_title('Correlation Matrix - Pearson')
+    fig.colorbar(im1, ax=axs[0], label='Correlation')
+
+    im2 = axs[1].imshow(matrix_spearman, cmap='viridis', interpolation='nearest')
+    axs[1].set_title('Correlation Matrix - Spearman')
+    fig.colorbar(im2, ax=axs[1], label='Correlation')
+
+    im3 = axs[2].imshow(matrix_kendal, cmap='viridis', interpolation='nearest')
+    axs[2].set_title('Correlation Matrix - Kendall-Tau')
+    fig.colorbar(im3, ax=axs[2], label='Correlation')
 
     plt.tight_layout()
     plt.savefig(path)

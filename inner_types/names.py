@@ -17,3 +17,6 @@ class ExportedFiles(Enum):
     ARI_PNG = 'ARI.png'
 
     KS_CHOSEN = 'ks_chosen.csv'
+
+    CORRELATION = 'Samples Correlation.png'
+    MCORRELATION = 'Correlation Matrix.png'
