@@ -46,10 +46,10 @@ def arguments():
                         help='The size of the sli window strategy. Default 3')
 
     parser.add_argument('--best_metric',
-                        type=bool,
-                        default=True,
-                        help='If True, the contact time is used as metric to generate the Best candidate. '
-                             'Otherwise, the SSIM will be used. Default True')
+                        type=str,
+                        default='contact_time',
+                        help='The metric used to generate the Best candidate. It can be contact_time or ssim.'
+                             'Default contact_time')
 
     parser.add_argument('--choice',
                         type=str,
@@ -81,7 +81,7 @@ def arguments():
 
     first_interval = parsed.first_interval
     last_interval = parsed.last_interval
-    best_metric = parsed.best_metric == 'True'
+    best_metric = parsed.best_metric
     apply_logit = parsed.apply_logit == 'True'
 
     if parsed.choice == 'aic':

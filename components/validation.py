@@ -113,7 +113,7 @@ def export_avg_ci(dataframe: pd.DataFrame,
 class Validation:
 
     def __init__(self, dataset: Dataset, approach: LearningApproach, strategy_type: WindowStrategyType,
-                 best_metric: bool):
+                 best_metric: str):
         self.dataset = dataset
         self.approach = approach
         self.strategy_type = strategy_type
@@ -151,10 +151,10 @@ class Validation:
             ari_dataframe[column_k(k)] = self.metric_validation(interval, clusters, labels, user_indexes,
                                                                 HeatmapMetric.ARI)
 
-            if self.best_metric:
-                best_metric_avg, best_k = best_candidate(contact_time_dataframe, k, best_metric_avg, best_k)
-            else:
+            if self.best_metric == 'ssim':
                 best_metric_avg, best_k = best_candidate(ssim_dataframe, k, best_metric_avg, best_k)
+            else:
+                best_metric_avg, best_k = best_candidate(contact_time_dataframe, k, best_metric_avg, best_k)
 
         helper.sort_scores(best_k)
 

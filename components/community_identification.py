@@ -18,7 +18,7 @@ class CommunityIdentification:
                  properties: FCAEProperties,
                  parameters: TrainingParameters,
                  strategy: WindowStrategy,
-                 best_metric: bool):
+                 best_metric: str):
         self.parameters = parameters
         self.strategy = strategy
         self.validation = Validation(dataset, approach, strategy.type, best_metric)
