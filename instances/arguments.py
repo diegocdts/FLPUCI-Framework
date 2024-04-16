@@ -16,8 +16,8 @@ def arguments():
                              'rt (Roma Taxi) or ngsim (Next Generation Simulation). Default rt')
 
     parser.add_argument('--apply_logit',
-                        type=bool,
-                        default=True,
+                        type=str,
+                        default='True',
                         help='If True, the logit transformation is applied to the DisplacementMatrix. Default True')
 
     parser.add_argument('--first_interval',
