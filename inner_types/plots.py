@@ -31,5 +31,6 @@ class FontSize(Enum):
 
 class Legend(Enum):
     BEST_LOCATION = 0
+    N_COLUMNS_1 = 1
     N_COLUMNS_2 = 2
     N_COLUMNS_3 = 3

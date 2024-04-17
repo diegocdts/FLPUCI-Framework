@@ -190,7 +190,11 @@ def plot_strategy_comparison(all_pairs_mean: float,
     ax.set_xticks(x_values)
     ax.set_xticklabels(labels, fontsize=FontSize.DEFAULT.value)
     ax.tick_params(axis='both', which='both', labelsize=FontSize.DEFAULT.value)
-    ax.legend(loc=Legend.BEST_LOCATION.value, fontsize=FontSize.DEFAULT.value)
+    ax.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_2.value, fontsize=FontSize.DEFAULT.value)
+
+    y_min, y_max = plt.gca().get_ylim()
+    diff = y_max - y_min
+    plt.ylim(bottom=max(0, y_min), top=y_max + (0.3 * diff))
 
     y_tick_2decimal()
 
@@ -239,6 +243,9 @@ def plot_time_evolution(all_pairs: list,
 
         fill_between(x_values, lower_bounds, means, upper_bounds, labels[index])
 
+    y_min, y_max = plt.gca().get_ylim()
+    diff = y_max - y_min
+    plt.ylim(bottom=max(0, y_min), top=y_max+(0.3*diff))
     plt.ylabel(axis_label.value, fontsize=FontSize.DEFAULT.value)
     plt.xlabel(AxisLabel.INTERVAL.value, fontsize=FontSize.DEFAULT.value)
     plt.xticks(x_values, fontsize=FontSize.DEFAULT.value)
