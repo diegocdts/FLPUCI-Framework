@@ -190,7 +190,7 @@ def plot_strategy_comparison(all_pairs_mean: float,
     ax.set_xticks(x_values)
     ax.set_xticklabels(labels, fontsize=FontSize.DEFAULT.value)
     ax.tick_params(axis='both', which='both', labelsize=FontSize.DEFAULT.value)
-    ax.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_2.value, fontsize=FontSize.DEFAULT.value)
+    ax.legend(loc=Legend.BEST_LOCATION.value, fontsize=FontSize.DEFAULT.value)
 
     y_min, y_max = plt.gca().get_ylim()
     diff = y_max - y_min
