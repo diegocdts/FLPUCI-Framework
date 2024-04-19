@@ -5,6 +5,7 @@ class FigSize(Enum):
     DEFAULT = (5.5, 6.5)
     WIDER = (12, 6)
     SQUARE = (7.5, 6.5)
+    SQUARE_2 = (9.5, 6.5)
 
 
 class AxisLabel(Enum):

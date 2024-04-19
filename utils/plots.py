@@ -78,7 +78,7 @@ def plot_metric(dataframe: pd.DataFrame,
                 ks_chosen: np.array,
                 axis_label: AxisLabel,
                 path: str):
-    plt.figure(figsize=FigSize.SQUARE.value)
+    plt.figure(figsize=FigSize.SQUARE_2.value)
     columns = dataframe.columns  # columns[0]=sources; columns[1]=all_pairs; columns[2:]=k=2|intra_..k=N|inter_community
     index_of_inter = int((len(columns) / 2) + 1)
 
