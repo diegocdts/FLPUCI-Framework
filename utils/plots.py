@@ -7,7 +7,9 @@ from matplotlib import colors as mcolors
 from scipy import interpolate
 
 from inner_functions.names import sources, choice_method
+from inner_functions.path import build_path
 from inner_types.learning import LearningApproach
+from inner_types.names import ExportedFiles
 from inner_types.plots import FigSize, AxisLabel, FontSize, Legend
 
 
@@ -137,6 +139,8 @@ def plot_metric(dataframe: pd.DataFrame,
     plt.xticks(k_candidates, fontsize=FontSize.DEFAULT.value)
     plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_3.value, fontsize=FontSize.DEFAULT.value)
 
+    y_min, _ = plt.gca().get_ylim()
+    plt.ylim(bottom=max(0, y_min))
     y_tick_2decimal()
 
     plt.tight_layout()
@@ -376,3 +380,10 @@ def heatmap_matrix_correlation(matrix_pearson: np.array, matrix_spearman: np.arr
     plt.tight_layout()
     plt.savefig(path)
     plt.close()
+
+
+def plot_existent_result(csv_path, results_path, k_candidates, png_name, axis_label):
+    curve_dataframe = pd.read_csv(csv_path, sep=',')
+    ks_chosen = np.loadtxt(build_path(results_path, ExportedFiles.KS_CHOSEN.value))
+    png_path = build_path(results_path, png_name)
+    plot_metric(curve_dataframe, k_candidates, ks_chosen, axis_label, png_path)

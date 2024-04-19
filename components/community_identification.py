@@ -1,14 +1,30 @@
 from components.deep_learning_model import FullConvolutionalAutoEncoder
 from components.federated_learning_model import FederatedFullConvolutionalAutoEncoder
 from components.validation import Validation
+from inner_functions.path import interval_dir, build_path, path_exists
 from inner_types.data import Dataset
 from inner_types.learning import LearningApproach, FCAEProperties, TrainingParameters, WindowStrategy
+from inner_types.names import ExportedFiles
+from inner_types.plots import AxisLabel
+from utils.plots import plot_existent_result
 
 
 def adjust_first_interval(first_interval: int):
     if first_interval <= 0:
         first_interval = 1
     return first_interval
+
+
+def results_exist(results_path, k_candidates):
+    names = [ExportedFiles.CONTACT_TIME_CSV, ExportedFiles.MSE_CSV, ExportedFiles.SSIM_CSV, ExportedFiles.ARI_CSV]
+    png_names = [ExportedFiles.CONTACT_TIME_PNG, ExportedFiles.MSE_PNG, ExportedFiles.SSIM_PNG, ExportedFiles.ARI_PNG]
+    axis_names = [AxisLabel.CONTACT_TIME, AxisLabel.MSE, AxisLabel.SSIM, AxisLabel.ARI]
+    for index, name in enumerate(names):
+        csv_path = build_path(results_path, name.value)
+        if not path_exists(csv_path):
+            return False
+        plot_existent_result(csv_path, results_path, k_candidates, png_names[index].value, axis_names[index])
+    return True
 
 
 class CommunityIdentification:
@@ -33,6 +49,12 @@ class CommunityIdentification:
 
         for end_window in range(first_interval, last_interval + 1):
             start_window = self.strategy.get_start_window(end_window)
+
+            results_path = build_path(self.validation.f9_results, interval_dir(interval=end_window - 1))
+
+            if results_exist(results_path, self.validation.dataset.k_candidates):
+                print(f'Results already exist for interval {end_window - 1}')
+                continue
 
             self.model.training(start_window, end_window)
 
