@@ -78,7 +78,7 @@ def plot_metric(dataframe: pd.DataFrame,
                 ks_chosen: np.array,
                 axis_label: AxisLabel,
                 path: str):
-    plt.figure(figsize=FigSize.WIDER.value)
+    plt.figure(figsize=FigSize.SQUARE.value)
     columns = dataframe.columns  # columns[0]=sources; columns[1]=all_pairs; columns[2:]=k=2|intra_..k=N|inter_community
     index_of_inter = int((len(columns) / 2) + 1)
 
@@ -105,8 +105,6 @@ def plot_metric(dataframe: pd.DataFrame,
     upper_bounds = np.array(upper_bounds)
 
     fill_between(k_candidates, lower_bounds, means, upper_bounds, all_pairs.capitalize())
-    #plt.errorbar(k_candidates, means, yerr=[means - lower_bounds, upper_bounds - means],
-    #             fmt='o', linewidth=2, capsize=6, label=all_pairs.capitalize())
 
     # intra_community curve
     intra_community = sources()[1]
@@ -114,20 +112,16 @@ def plot_metric(dataframe: pd.DataFrame,
     means = dataframe.iloc[1][intra_columns].to_numpy().astype(float)
     upper_bounds = dataframe.iloc[2][intra_columns].to_numpy().astype(float)
 
-    #fill_between(k_candidates, lower_bounds, means, upper_bounds, intra_community.capitalize())
     plt.errorbar(k_candidates, means, yerr=[means - lower_bounds, upper_bounds - means],
                  fmt='^', linewidth=2, capsize=6, label=intra_community.capitalize())
 
-    #plt.scatter(k_candidates[index_aic_choice], means[index_aic_choice], color=colors('orange'))
-    plt.text(k_candidates[index_aic_choice], means[index_aic_choice], f'AIC choice (k={ks_chosen[0]})',
+    plt.text(k_candidates[index_aic_choice], means[index_aic_choice], f'AIC choice (k={(int(ks_chosen[0]))})',
              verticalalignment='bottom', horizontalalignment='left')
 
-    #plt.scatter(k_candidates[index_bic_choice], means[index_bic_choice], color=colors('orange'))
-    plt.text(k_candidates[index_bic_choice], means[index_bic_choice], f'BIC choice (k={ks_chosen[1]})',
+    plt.text(k_candidates[index_bic_choice], means[index_bic_choice], f'BIC choice (k={int(ks_chosen[1])})',
              verticalalignment='top', horizontalalignment='left')
 
-    #plt.scatter(k_candidates[index_best_choice], means[index_best_choice], color=colors('orange'))
-    plt.text(k_candidates[index_best_choice], means[index_best_choice], f'Best choice  (k={ks_chosen[2]})',
+    plt.text(k_candidates[index_best_choice], means[index_best_choice], f'Best choice  (k={int(ks_chosen[2])})',
              verticalalignment='center', horizontalalignment='right')
 
     # inter_community curve
@@ -136,13 +130,8 @@ def plot_metric(dataframe: pd.DataFrame,
     means = dataframe.iloc[1][inter_columns].to_numpy().astype(float)
     upper_bounds = dataframe.iloc[2][inter_columns].to_numpy().astype(float)
 
-    #fill_between(k_candidates, lower_bounds, means, upper_bounds, inter_community.capitalize())
     plt.errorbar(k_candidates, means, yerr=[means - lower_bounds, upper_bounds - means],
                  fmt='v', linewidth=2, capsize=6, label=inter_community.capitalize())
-
-    #plt.scatter(k_candidates[index_aic_choice], means[index_aic_choice], color=colors('green'))
-    #plt.scatter(k_candidates[index_bic_choice], means[index_bic_choice], color=colors('green'))
-    #plt.scatter(k_candidates[index_best_choice], means[index_best_choice], color=colors('green'))
 
     plt.ylabel(axis_label.value, fontsize=FontSize.DEFAULT.value)
     plt.xlabel(AxisLabel.K.value, fontsize=FontSize.DEFAULT.value)
