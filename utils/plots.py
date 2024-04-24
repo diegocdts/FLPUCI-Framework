@@ -115,14 +115,14 @@ def plot_metric(dataframe: pd.DataFrame,
     plt.errorbar(k_candidates, means, yerr=[means - lower_bounds, upper_bounds - means],
                  fmt='^', linewidth=2, capsize=6, label=intra_community.capitalize())
 
-    plt.text(k_candidates[index_aic_choice], means[index_aic_choice], f'AIC choice (k={(int(ks_chosen[0]))})',
-             verticalalignment='bottom', horizontalalignment='left')
+    plt.text(k_candidates[index_aic_choice], means[index_aic_choice], f'AIC (k={(int(ks_chosen[0]))})', rotation=90,
+             verticalalignment='bottom', horizontalalignment='left', fontsize=FontSize.DEFAULT.value)
 
-    plt.text(k_candidates[index_bic_choice], means[index_bic_choice], f'BIC choice (k={int(ks_chosen[1])})',
-             verticalalignment='top', horizontalalignment='left')
+    plt.text(k_candidates[index_bic_choice], means[index_bic_choice], f'BIC (k={int(ks_chosen[1])})', rotation=270,
+             verticalalignment='top', horizontalalignment='left', fontsize=FontSize.DEFAULT.value)
 
-    plt.text(k_candidates[index_best_choice], means[index_best_choice], f'Best choice  (k={int(ks_chosen[2])})',
-             verticalalignment='center', horizontalalignment='right')
+    plt.text(k_candidates[index_best_choice], means[index_best_choice], f'Best (k={int(ks_chosen[2])})', rotation=270,
+             verticalalignment='center', horizontalalignment='right', fontsize=FontSize.DEFAULT.value)
 
     # inter_community curve
     inter_community = sources()[2]
