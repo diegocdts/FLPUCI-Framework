@@ -65,7 +65,7 @@ class FederatedFullConvolutionalAutoEncoder:
         self.iterative_process, self.state = self.global_model_start()
         self.evaluator = self.build_evaluator()
         self.dataset_name = self.federated_data_handler.sample_handler.dataset.name
-        self.f9_checkpoint = Path.f8_checkpoints(self.dataset_name, LearningApproach.FED)
+        self.f8_checkpoint = Path.f8_checkpoints(self.dataset_name, LearningApproach.FED)
         self.state_manager = None
 
     def model_fn(self):
@@ -107,7 +107,7 @@ class FederatedFullConvolutionalAutoEncoder:
     def training(self, start_window: int, end_window: int):
         loop = asyncio.get_event_loop()
         rounds = self.federated_data_handler.parameters.rounds
-        path = build_path(self.f9_checkpoint, start_end_window_dir(start_window, end_window))
+        path = build_path(self.f8_checkpoint, start_end_window_dir(start_window, end_window))
         self.init_state_manager(path, rounds)
         next_round = self.get_next_round(loop)
 
