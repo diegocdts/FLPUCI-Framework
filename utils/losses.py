@@ -1,8 +1,11 @@
+import os
+
 import numpy as np
 
 from inner_functions.path import build_path, path_exists
 from inner_types.learning import LearningApproach
 from inner_types.names import ExportedFiles
+from inner_types.path import Path
 from utils.plots import plot_losses
 
 
@@ -44,3 +47,15 @@ class LossesHandler:
         self.training_losses.tofile(self.training_path, sep=',')
         self.testing_losses.tofile(self.testing_path, sep=',')
         plot_losses(self.training_losses, self.testing_losses, self.approach, self.plot_path)
+
+
+def replot_losses(dataset_name, approach):
+    f8_checkpoints = Path.f8_checkpoints(dataset_name, approach)
+    windows = sorted(os.listdir(f8_checkpoints))
+    print(f8_checkpoints)
+
+    for window in windows:
+        path = build_path(f8_checkpoints, window)
+        loss_handler = LossesHandler(path, LearningApproach.FED)
+        loss_handler.load(1)
+        loss_handler.save_losses()

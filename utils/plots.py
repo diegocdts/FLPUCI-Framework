@@ -17,11 +17,12 @@ def colors(color_name: str):
     return mcolors.TABLEAU_COLORS.get(f'tab:{color_name}')
 
 
-def y_tick_2decimal():
+def y_tick_2decimal(n_decimal = 2):
     locs, labels = plt.yticks()
     y_ticks = np.array([])
+    format_string = '{:.' + str(n_decimal) + 'f}'
     for idx in np.linspace(locs[0], locs[-1], num=5):
-        y_ticks = np.append(y_ticks, '{:.2f}'.format(idx))
+        y_ticks = np.append(y_ticks, format_string.format(idx))
     plt.yticks(y_ticks.astype(float), fontsize=FontSize.DEFAULT.value)
 
 
@@ -44,10 +45,8 @@ def fill_between(x_values, lower_bounds, means, upper_bounds, label, kwargs=None
 
 
 def plot_losses(training_losses: np.array, testing_losses: np.array, approach: LearningApproach, path: str):
-    plt.figure(figsize=FigSize.WIDER.value)
+    plt.figure(figsize=FigSize.SMALL.value)
 
-    plt.ylim([0.0, 0.1])
-    plt.yticks(np.arange(0, 0.11, 0.01), fontsize=FontSize.DEFAULT.value)
     plt.ylabel(AxisLabel.LOSS.value, fontsize=FontSize.DEFAULT.value)
 
     steps = int(len(training_losses) / 10) if len(training_losses) >= 50 else int(len(training_losses) / 5)
@@ -59,14 +58,16 @@ def plot_losses(training_losses: np.array, testing_losses: np.array, approach: L
 
     plt.plot(x_values, training_losses, '-', label='Training losses')
     plt.plot(x_values, testing_losses, '--', label='Testing losses')
-    plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_2.value, fontsize=FontSize.DEFAULT.value)
+    plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_1.value, fontsize=FontSize.DEFAULT.value)
 
     if approach == LearningApproach.CEN:
         plt.xlabel(AxisLabel.EPOCH.value, fontsize=FontSize.DEFAULT.value)
     else:
         plt.xlabel(AxisLabel.ROUND.value, fontsize=FontSize.DEFAULT.value)
 
-    y_tick_2decimal()
+    y_min, y_max = plt.gca().get_ylim()
+    plt.ylim(bottom=max(0, y_min), top=min(0.2, y_max))
+    y_tick_2decimal(3)
 
     plt.tight_layout()
     plt.savefig(path)
