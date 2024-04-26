@@ -219,7 +219,7 @@ def plot_time_evolution(all_pairs: list,
                         axis_label: AxisLabel,
                         path: str):
     plt.figure(figsize=FigSize.WIDER.value)
-    x_values = np.arange(1, len(all_pairs[0]) + 1)
+    x_values = np.arange(0, len(all_pairs[0]))
 
     curves = [all_pairs,
               fed_acc_intra,
