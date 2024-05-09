@@ -262,7 +262,7 @@ def plot_time_evolution(all_pairs: list,
     plt.close()
 
 
-def plot_losses_hyperparameters(path: str):
+def plot_losses_hyperparameters(path: str, file_name: str):
     files = [file for file in sorted(os.listdir(path), reverse=True) if file.endswith('csv')]
 
     plt.figure(figsize=FigSize.SQUARE.value)
@@ -302,7 +302,7 @@ def plot_losses_hyperparameters(path: str):
     y_tick_2decimal()
 
     plt.tight_layout()
-    plt.savefig(f'{path}/losses hyperparameter.png')
+    plt.savefig(f'{path}/{file_name}.pdf')
     plt.close()
 
 
