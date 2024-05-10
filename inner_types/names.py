@@ -18,5 +18,5 @@ class ExportedFiles(Enum):
 
     KS_CHOSEN = 'ks_chosen.csv'
 
-    CORRELATION = 'Samples Correlation.pdf'
-    MCORRELATION = 'Correlation Matrix.pdf'
+    CORRELATION = 'Samples Correlation.png'
+    MCORRELATION = 'Correlation Matrix.png'

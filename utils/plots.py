@@ -316,7 +316,7 @@ def plot_avg_correlations(pearson_means, pearson_ci, spearman_means, spearman_ci
         fill_between(intervals, lower_bounds, means, upper_bounds, label=label, kwargs=kwargs)
 
     plt.figure(figsize=FigSize.WIDER.value)
-    intervals = np.arange(1, len(pearson_means) + 1)
+    intervals = np.arange(0, len(pearson_means))
 
     plot_type_correlation(pearson_means, pearson_ci, 'Pearson',
                           kwargs={'color': colors('blue'), 'linestyle': 'dashdot', 'linewidth': 2})
@@ -365,15 +365,15 @@ def plot_correlations(pearson_matrix, pearson_mean, spearman_matrix, spearman_me
 def heatmap_matrix_correlation(matrix_pearson: np.array, matrix_spearman: np.array, matrix_kendal: np.array, path):
     fig, axs = plt.subplots(1, 3, figsize=(14, 6))
 
-    im1 = axs[0].imshow(matrix_pearson, cmap='viridis', interpolation='nearest')
+    im1 = axs[0].imshow(matrix_pearson, cmap='viridis', interpolation='nearest', vmin=-0.05, vmax=1)
     axs[0].set_title('Correlation Matrix - Pearson')
     fig.colorbar(im1, ax=axs[0], label='Correlation')
 
-    im2 = axs[1].imshow(matrix_spearman, cmap='viridis', interpolation='nearest')
+    im2 = axs[1].imshow(matrix_spearman, cmap='viridis', interpolation='nearest', vmin=-0.05, vmax=1)
     axs[1].set_title('Correlation Matrix - Spearman')
     fig.colorbar(im2, ax=axs[1], label='Correlation')
 
-    im3 = axs[2].imshow(matrix_kendal, cmap='viridis', interpolation='nearest')
+    im3 = axs[2].imshow(matrix_kendal, cmap='viridis', interpolation='nearest', vmin=-0.05, vmax=1)
     axs[2].set_title('Correlation Matrix - Kendall-Tau')
     fig.colorbar(im3, ax=axs[2], label='Correlation')
 
