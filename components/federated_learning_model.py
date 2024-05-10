@@ -60,6 +60,7 @@ class FederatedDataHandler:
 class FederatedFullConvolutionalAutoEncoder:
 
     def __init__(self, dataset: Dataset, parameters: TrainingParameters, properties: FCAEProperties):
+        self.proximal_term = dataset.proximal_term
         self.properties = properties
         self.federated_data_handler = FederatedDataHandler(dataset, parameters)
         self.iterative_process, self.state = self.global_model_start()
@@ -77,10 +78,11 @@ class FederatedFullConvolutionalAutoEncoder:
         )
 
     def global_model_start(self):
-        iterative_process = tff.learning.algorithms.build_weighted_fed_avg(
+        iterative_process = tff.learning.algorithms.build_weighted_fed_prox(
             model_fn=self.model_fn,
             client_optimizer_fn=lambda: tf.keras.optimizers.Adam(learning_rate=self.properties.learning_rate),
-            server_optimizer_fn=lambda: tf.keras.optimizers.Adam(learning_rate=self.properties.learning_rate)
+            server_optimizer_fn=lambda: tf.keras.optimizers.Adam(learning_rate=self.properties.learning_rate),
+            proximal_strength=self.proximal_term
         )
         # print(str(iterative_process.initialize.type_signature))
         return iterative_process, iterative_process.initialize()

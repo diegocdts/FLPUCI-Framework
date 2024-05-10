@@ -56,6 +56,12 @@ def arguments():
                         default='best',
                         help='The K choice to plot in the time evolution. It may be aic, bic or best. Default best.')
 
+    parser.add_argument('--proximal_term',
+                        type=float,
+                        default=0.0,
+                        help='The parameter of FedProx\'s regularization term. When set to 0.0, the algorithm reduces '
+                             'to FedAvg Default 0.0.')
+
     parsed = parser.parse_args()
 
     properties = sfc_rt_properties
@@ -66,6 +72,7 @@ def arguments():
     else:
         dataset = ngsim
         properties = ngsim_properties
+    dataset.proximal_term = parsed.proximal_term
 
     if parsed.approach == 'cen':
         approach = LearningApproach.CEN
