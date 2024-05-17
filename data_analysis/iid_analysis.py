@@ -81,8 +81,8 @@ class SampleCorrelation:
             corr = correlation(image_i, image_j)
             if type(corr) is tuple:
                 corr = corr[0]
-            corr_abs = np.absolute(corr)
-            corr_mean = np.mean(corr_abs)
+            #corr_abs = np.absolute(corr)
+            corr_mean = np.mean(corr)
             matrix[index_i, index_j] = corr_mean
             matrix[index_j, index_i] = corr_mean
         return matrix
