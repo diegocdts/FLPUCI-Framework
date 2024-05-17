@@ -29,10 +29,12 @@ class AxisLabel(Enum):
 
 class FontSize(Enum):
     DEFAULT = 14
+    LARGE = 17
 
 
 class Legend(Enum):
     BEST_LOCATION = 0
+    UPPER_RIGHT = 1
     N_COLUMNS_1 = 1
     N_COLUMNS_2 = 2
     N_COLUMNS_3 = 3

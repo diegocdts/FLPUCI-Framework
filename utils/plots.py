@@ -113,17 +113,21 @@ def plot_metric(dataframe: pd.DataFrame,
     means = dataframe.iloc[1][intra_columns].to_numpy().astype(float)
     upper_bounds = dataframe.iloc[2][intra_columns].to_numpy().astype(float)
 
+    v_alignment = 'top'
+    if 'MSE' in axis_label.value:
+        v_alignment = 'bottom'
+
     plt.errorbar(k_candidates, means, yerr=[means - lower_bounds, upper_bounds - means],
                  fmt='^', linewidth=2, capsize=6, label=intra_community.capitalize())
 
-    plt.text(k_candidates[index_aic_choice], means[index_aic_choice], f'AIC (k={(int(ks_chosen[0]))})', rotation=90,
-             verticalalignment='bottom', horizontalalignment='left', fontsize=FontSize.DEFAULT.value)
+    plt.text(k_candidates[index_aic_choice], means[index_aic_choice], f'AIC (k={(int(ks_chosen[0]))})', rotation=270,
+             verticalalignment=v_alignment, horizontalalignment='left', fontsize=FontSize.LARGE.value)
 
     plt.text(k_candidates[index_bic_choice], means[index_bic_choice], f'BIC (k={int(ks_chosen[1])})', rotation=270,
-             verticalalignment='top', horizontalalignment='left', fontsize=FontSize.DEFAULT.value)
+             verticalalignment=v_alignment, horizontalalignment='right', fontsize=FontSize.LARGE.value)
 
     plt.text(k_candidates[index_best_choice], means[index_best_choice], f'Best (k={int(ks_chosen[2])})', rotation=270,
-             verticalalignment='center', horizontalalignment='right', fontsize=FontSize.DEFAULT.value)
+             verticalalignment=v_alignment, horizontalalignment='center', fontsize=FontSize.LARGE.value)
 
     # inter_community curve
     inter_community = sources()[2]
@@ -134,13 +138,15 @@ def plot_metric(dataframe: pd.DataFrame,
     plt.errorbar(k_candidates, means, yerr=[means - lower_bounds, upper_bounds - means],
                  fmt='v', linewidth=2, capsize=6, label=inter_community.capitalize())
 
-    plt.ylabel(axis_label.value, fontsize=FontSize.DEFAULT.value)
-    plt.xlabel(AxisLabel.K.value, fontsize=FontSize.DEFAULT.value)
-    plt.xticks(k_candidates, fontsize=FontSize.DEFAULT.value)
-    plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_3.value, fontsize=FontSize.DEFAULT.value)
+    plt.ylabel(axis_label.value, fontsize=FontSize.LARGE.value)
+    plt.xlabel(AxisLabel.K.value, fontsize=FontSize.LARGE.value)
+    plt.xticks(k_candidates[::2], fontsize=FontSize.LARGE.value)
+    plt.yticks(fontsize=FontSize.LARGE.value)
+    plt.legend(loc=Legend.UPPER_RIGHT.value, ncol=Legend.N_COLUMNS_3.value, fontsize=FontSize.LARGE.value)
 
-    y_min, _ = plt.gca().get_ylim()
-    plt.ylim(bottom=max(0, y_min))
+    y_min, y_max = plt.gca().get_ylim()
+    diff = y_max - y_min
+    plt.ylim(bottom=max(0, y_min), top=y_max + (0.14 * diff))
     y_tick_2decimal()
 
     plt.tight_layout()
