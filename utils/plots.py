@@ -70,7 +70,7 @@ def plot_losses(training_losses: np.array, testing_losses: np.array, approach: L
     y_tick_2decimal(3)
 
     plt.tight_layout()
-    plt.savefig(path)
+    plt.savefig(path, dpi=400)
     plt.close()
 
 
@@ -144,7 +144,7 @@ def plot_metric(dataframe: pd.DataFrame,
     y_tick_2decimal()
 
     plt.tight_layout()
-    plt.savefig(path)
+    plt.savefig(path, dpi=400)
     plt.close()
 
 
@@ -203,7 +203,7 @@ def plot_strategy_comparison(all_pairs_mean: float,
     y_tick_2decimal()
 
     plt.tight_layout()
-    plt.savefig(path)
+    plt.savefig(path, dpi=400)
     plt.close()
 
 
@@ -258,7 +258,7 @@ def plot_time_evolution(all_pairs: list,
     y_tick_2decimal()
 
     plt.tight_layout()
-    plt.savefig(path)
+    plt.savefig(path, dpi=400)
     plt.close()
 
 
@@ -302,7 +302,7 @@ def plot_losses_hyperparameters(path: str, file_name: str):
     y_tick_2decimal()
 
     plt.tight_layout()
-    plt.savefig(f'{path}/{file_name}.pdf')
+    plt.savefig(f'{path}/{file_name}.pdf', dpi=400)
     plt.close()
 
 
@@ -333,7 +333,7 @@ def plot_avg_correlations(pearson_means, pearson_ci, spearman_means, spearman_ci
     y_tick_2decimal()
 
     plt.tight_layout()
-    plt.savefig(path)
+    plt.savefig(path, dpi=400)
     plt.close()
 
 
@@ -358,7 +358,7 @@ def plot_correlations(pearson_matrix, pearson_mean, spearman_matrix, spearman_me
     y_tick_2decimal()
 
     plt.tight_layout()
-    plt.savefig(path)
+    plt.savefig(path, dpi=400)
     plt.close()
 
 
@@ -378,7 +378,7 @@ def heatmap_matrix_correlation(matrix_pearson: np.array, matrix_spearman: np.arr
     fig.colorbar(im3, ax=axs[2], label='Correlation')
 
     plt.tight_layout()
-    plt.savefig(path)
+    plt.savefig(path, dpi=400)
     plt.close()
 
 
