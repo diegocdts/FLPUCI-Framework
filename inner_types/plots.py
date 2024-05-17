@@ -3,10 +3,10 @@ from enum import Enum
 
 class FigSize(Enum):
     DEFAULT = (5.5, 6.5)
-    WIDER = (12, 6)
+    WIDER = (12.2, 6)
     SQUARE = (7.5, 6.5)
-    SQUARE_2 = (9.5, 5)
-    SMALL = (5.5, 3)
+    SQUARE_2 = (9.55, 5)
+    SMALL = (7, 4)
 
 
 class AxisLabel(Enum):
@@ -29,7 +29,9 @@ class AxisLabel(Enum):
 
 class FontSize(Enum):
     DEFAULT = 14
-    LARGE = 17
+    LARGE = 16
+
+    WEIGHT_SBOLD = 'semibold'
 
 
 class Legend(Enum):
