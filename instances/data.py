@@ -9,7 +9,7 @@ original_sfc = Dataset(name='sanfranciscocabs',
                        attribute_indexes=LatYLonXTimeIndexes(0, 1, 3))
 
 sfc = Dataset(name='sanfranciscocabs',
-              hours_per_interval=3,
+              hours_per_interval=4,
               first_epoch=1211846400, last_epoch=1212451200, #last_epoch=1211932800,
               lat_y_min=37.71000, lat_y_max=37.81399,
               lon_x_min=-122.51584, lon_x_max=-122.38263,
@@ -25,7 +25,7 @@ original_rt = Dataset(name='romataxi',
                       attribute_indexes=LatYLonXTimeIndexes(0, 1, 3))
 
 rt = Dataset(name='romataxi',
-             hours_per_interval=3,
+             hours_per_interval=4,
              first_epoch=1391472000, last_epoch=1392076800, #last_epoch=1391558400,
              lat_y_min=41.84250, lat_y_max=41.94607,
              lon_x_min=12.42272, lon_x_max=12.56157,
