@@ -1,0 +1,5 @@
+nvidia-cudnn-cu12
+nvidia-cuda-runtime-cu12
+--extra-index-url https://pypi.nvidia.com tensorrt-libs
+tensorrt
+tensorrt_bindings

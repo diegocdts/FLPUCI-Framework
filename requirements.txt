@@ -1,0 +1,9 @@
+tensorflow==2.13.0
+tensorflow-federated
+nest_asyncio
+seaborn
+matplotlib
+scikit-image
+scikit-learn
+scipy
+utm
