@@ -92,3 +92,20 @@ class Path:
     @staticmethod
     def f9_base(dataset: str):
         return dir_exists_create('{}/f9_results/'.format(dataset))
+
+    @staticmethod
+    def f9_community_info(dataset: str, approach: LearningApproach, strategy_type: WindowStrategyType, proximal):
+        info = '_community_info'
+        if approach == LearningApproach.CEN:
+            return dir_exists_create('{}/f9_results/{}/{}{}/'.format(dataset, approach.value, strategy_type, info))
+        else:
+            return dir_exists_create('{}/f9_results/{}/{}/{}{}/'
+                                     .format(dataset, approach.value, dir_proximal(proximal), strategy_type, info))
+
+    @staticmethod
+    def f9_community_id_maps(f9_info: str):
+        return dir_exists_create('{}/community_id_maps'.format(f9_info))
+
+    @staticmethod
+    def f9_previous_community_count(f9_info: str):
+        return dir_exists_create('{}/previous_community_count'.format(f9_info))
