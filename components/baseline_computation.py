@@ -187,7 +187,6 @@ class BaselineComputation:
                     if id_i != id_j:
                         if contact_times.get(dictionary_key(id_i, id_j)) is None:
                             add_dictionary_entry(contact_times, id_i, id_j, 0.0)
-                            add_dictionary_entry(contact_times, id_j, id_i, 0.0)
 
                 del file_df
                 export_dictionary(contact_times, output_file_path)
