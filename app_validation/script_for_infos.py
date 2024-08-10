@@ -55,5 +55,6 @@ class StrategyInfos:
                         else:
                             dict_previous_community_count[par_ij] += 1
 
-            with open(count_path, 'w') as json_file:
-                json.dump(dict_previous_community_count, json_file)
+            with open(count_path, 'w') as file:
+                for key, value in dict_previous_community_count.items():
+                    file.write(f'{key} {value}\n')
