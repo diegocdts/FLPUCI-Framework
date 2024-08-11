@@ -168,14 +168,14 @@ class BaselineComputation:
                 contact_times = {}
 
                 for index_i, series_i in file_df.iterrows():
-                    id_i = series_i.id
+                    id_i = int(series_i.id)
                     aux_df = file_df[file_df.id != series_i.id]
                     aux_df = aux_df[aux_df.cell == series_i.cell]
                     aux_df = aux_df[aux_df.exit > series_i.entry]
                     aux_df = aux_df[aux_df.entry < series_i.exit]
 
                     for index_j, series_j in aux_df.iterrows():
-                        id_j = series_j.id
+                        id_j = int(series_j.id)
                         last_entry = max(series_i.entry, series_j.entry)
                         first_exit = min(series_i.exit, series_j.exit)
                         contact_time_value = first_exit - last_entry
@@ -184,6 +184,7 @@ class BaselineComputation:
                     del aux_df
 
                 for id_i, id_j in product(file_df.id, repeat=2):
+                    id_i, id_j = int(id_i), int(id_j)
                     if id_i != id_j:
                         if contact_times.get(dictionary_key(id_i, id_j)) is None:
                             add_dictionary_entry(contact_times, id_i, id_j, 0.0)
