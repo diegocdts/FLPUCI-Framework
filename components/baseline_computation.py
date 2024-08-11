@@ -261,4 +261,4 @@ def compute_baseline(dataset: Dataset):
     baseline.cell_entry_exit()
     baseline.interval_entry_exit()
     baseline.contact_time()
-    #baseline.image_metrics()
+    baseline.image_metrics()
