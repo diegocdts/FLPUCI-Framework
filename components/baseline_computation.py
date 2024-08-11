@@ -99,18 +99,18 @@ class BaselineComputation:
 
                 if len(file_lines) > 0:
 
-                    first_line = file_lines[0].split(',')
+                    first_line = file_lines[0].replace('\n', '').split(',')
                     previous_interval = int(first_line[0])
                     x, y = float(first_line[1]), float(first_line[2])
                     y_index = int(y / self.dataset.resolution[0]) + y_padding
                     x_index = int(x / self.dataset.resolution[1]) + x_padding
                     previous_cell = (x_index * self.dataset.height) + y_index
 
-                    entry_cell, exit_cell = int(first_line[3]), int(first_line[3])
+                    entry_cell, exit_cell = float(first_line[3]), float(first_line[3])
 
                     for line in file_lines:
-                        split = line.split(',')
-                        current_interval, x, y, time = int(split[0]), float(split[1]), float(split[2]), int(split[3])
+                        split = line.replace('\n', '').split(',')
+                        current_interval, x, y, time = int(split[0]), float(split[1]), float(split[2]), float(split[3])
                         y_index = int(y / self.dataset.resolution[0]) + y_padding
                         x_index = int(x / self.dataset.resolution[1]) + x_padding
                         current_cell = (x_index * self.dataset.height) + y_index

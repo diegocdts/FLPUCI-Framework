@@ -19,7 +19,7 @@ def get_lines_and_splitter(file_path: str, time_index: int):
     with open(file_path, 'r') as file:
         lines = file.readlines()
         splitter = ',' if ',' in lines[0] else ' '
-        times = [int(line.split(splitter)[time_index]) for line in lines]
+        times = [float(line.split(splitter)[time_index].replace('\n', '')) for line in lines]
     if times[0] > times[-1]:
         lines = lines[::-1]
     return lines, splitter
@@ -76,10 +76,10 @@ class CleaningData:
         lon_x = float(split[self.dataset.attribute_indexes.lon_x])
         lat_y = float(split[self.dataset.attribute_indexes.lat_y])
         time = split[self.dataset.attribute_indexes.time].replace(' ', '').replace('\n', '')
-        time = int(time)
+        time = float(time)
         return lon_x, lat_y, time
 
-    def check_last_interval(self, time: int):
+    def check_last_interval(self, time: float):
         """
         Checks if the dataset last_epoch is not None and the time attribute is smaller than it or if the
         dataset last_epoch is None
