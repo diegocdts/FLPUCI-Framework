@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-from inner_functions.path import build_path, path_exists
+from inner_functions.path import build_path, path_exists, sorted_files
 from inner_types.learning import LearningApproach
 from inner_types.names import ExportedFiles
 from inner_types.path import Path
@@ -51,7 +51,7 @@ class LossesHandler:
 
 def replot_losses(dataset_name, approach, proximal):
     f8_checkpoints = Path.f8_checkpoints(dataset_name, approach, proximal)
-    windows = sorted(os.listdir(f8_checkpoints))
+    windows = sorted_files(f8_checkpoints)
 
     for window in windows:
         path = build_path(f8_checkpoints, window)

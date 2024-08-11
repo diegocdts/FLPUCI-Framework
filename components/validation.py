@@ -8,9 +8,9 @@ from scipy import stats
 from sklearn.mixture import GaussianMixture
 
 from inner_functions.files import read_json
-from inner_functions.names import sources, column_k, curves, sort_name
+from inner_functions.names import sources, column_k, curves
 from inner_functions.path import (build_path, interval_dir, interval_json, metric_interval_json, mkdir,
-                                  get_subdir_list, path_exists)
+                                  get_subdir_list, path_exists, natural_sort_key)
 from inner_types.data import Dataset
 from inner_types.learning import LearningApproach, WindowStrategyType
 from inner_types.names import ExportedFiles
@@ -305,7 +305,7 @@ class Validation:
                 current_common_subdir_list = common_subdir_list
             else:
                 current_common_subdir_list = current_common_subdir_list.intersection(common_subdir_list)
-        current_common_subdir_list = sorted(current_common_subdir_list, key=sort_name)
+        current_common_subdir_list = sorted(current_common_subdir_list, key=natural_sort_key)
 
         axis = [AxisLabel.CONTACT_TIME, AxisLabel.MSE, AxisLabel.SSIM, AxisLabel.ARI]
         csvs = [ExportedFiles.CONTACT_TIME_CSV, ExportedFiles.MSE_CSV, ExportedFiles.SSIM_CSV, ExportedFiles.ARI_CSV]

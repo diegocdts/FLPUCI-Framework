@@ -1,10 +1,15 @@
 import os
+import re
 
 from inner_types.validation import HeatmapMetric
 
 
+def natural_sort_key(text):
+    return [int(part) if part.isdigit() else part.lower() for part in re.split('(\d+)', text)]
+
+
 def sorted_files(dir_path: str):
-    return sorted(os.listdir(dir_path))
+    return sorted(os.listdir(dir_path), key=natural_sort_key)
 
 
 def build_path(path_to_dir_or_file: str, dir_or_file_name: str):

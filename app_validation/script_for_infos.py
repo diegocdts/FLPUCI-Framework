@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from itertools import product
-from inner_functions.path import build_path
+from inner_functions.path import build_path, sorted_files
 from inner_types.names import ExportedFiles
 from inner_types.path import Path, labels_for_k
 
@@ -22,7 +22,7 @@ class StrategyInfos:
         self.choice_index = choice_index
 
     def get_community_id_maps(self):
-        intervals = sorted(os.listdir(self.f9_results))
+        intervals = sorted_files(self.f9_results)
 
         for interval in intervals:
             interval_path = build_path(self.f9_results, interval)
@@ -35,7 +35,7 @@ class StrategyInfos:
             shutil.copy(source_path, destination_path)
 
     def get_previous_community_count(self):
-        community_id_maps = sorted(os.listdir(self.f9_community_id_maps))
+        community_id_maps = sorted_files(self.f9_community_id_maps)
 
         dict_previous_community_count = {}
 

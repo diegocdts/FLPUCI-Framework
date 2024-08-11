@@ -13,7 +13,3 @@ def choice_method():
 
 def column_k(k: int):
     return f'k={k}'
-
-
-def sort_name(directory):
-    return int(directory.split('_')[1])
