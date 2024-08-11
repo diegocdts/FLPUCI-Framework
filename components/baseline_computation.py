@@ -179,8 +179,7 @@ class BaselineComputation:
                         last_entry = max(series_i.entry, series_j.entry)
                         first_exit = min(series_i.exit, series_j.exit)
                         contact_time_value = first_exit - last_entry
-                        add_dictionary_entry(contact_times, id_i, id_j, contact_time_value)
-                        add_dictionary_entry(contact_times, id_j, id_i, contact_time_value)
+                        add_dictionary_entry(contact_times, id_i, id_j, round(contact_time_value, 2))
                     del aux_df
 
                 for id_i, id_j in product(file_df.id, repeat=2):
@@ -262,4 +261,4 @@ def compute_baseline(dataset: Dataset):
     baseline.cell_entry_exit()
     baseline.interval_entry_exit()
     baseline.contact_time()
-    baseline.image_metrics()
+    #baseline.image_metrics()
