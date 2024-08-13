@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
 
+from inner_functions.path import interval_dir
+
 
 def stacked_columns(current_nodes_per_community, current_label_counts,
-                    previous_label_counts, interval):
+                    previous_label_counts, interval, path):
     communities = [f'Community {i}' for i in range(len(current_nodes_per_community))]
     nodes = [current_nodes_per_community[i] for i in range(len(communities))]
     current_infected = [0] * len(current_nodes_per_community)
@@ -26,8 +28,6 @@ def stacked_columns(current_nodes_per_community, current_label_counts,
     x_min, x_max = plt.xlim()
     y_min, y_max = plt.ylim()
 
-    x_middle = (x_min + x_max) / 2
-
     plt.text(-2, y_max + 1, f'Total nodes present at the interval {interval}: {sum(nodes)}\n'
                             f'Total number of users infected and present at the interval {interval}: '
                             f'{sum(previous_infected) + sum(current_infected)}',
@@ -39,4 +39,4 @@ def stacked_columns(current_nodes_per_community, current_label_counts,
     plt.xticks(rotation=45)
     plt.legend()
     plt.tight_layout()
-    plt.show()
+    plt.savefig(f'{path}/{interval_dir(interval)}.pdf')

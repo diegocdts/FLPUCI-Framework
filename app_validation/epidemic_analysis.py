@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 from app_validation.plots import stacked_columns
-from inner_functions.path import build_path, interval_dir, path_exists
+from inner_functions.path import build_path, interval_dir, path_exists, mkdir
 from inner_types.names import ExportedFiles
 from inner_types.path import Path, labels_for_k
 
@@ -13,11 +13,31 @@ class EpidemicAnalysis:
         self.dataset = dataset
         self.f9_results = Path.f9_results(dataset.name, approach, strategy_type, dataset.proximal_term)
         self.choice_index = choice_index
+        self.reports_path = ''
+        self.time_infection_path = ''
 
-    def analysis(self, path_time_infection: str):
+    def generate_time_infection(self, reports_path, file_name):
+        self.reports_path = reports_path
+        file_path = build_path(reports_path, file_name)
+        time_and_infected = ''
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+            lines = [line for line in lines if line.__contains__(' R\n') or line.endswith(' D\n')]
+            total_infected = len(lines)
+            for line in lines:
+                split = line.split(' ')
+                time = round(float(split[0]), 2)
+                infected = split[3]
+                new_line = f'{time} {infected}\n'
+                time_and_infected = f'{time_and_infected}{new_line}'
+        self.time_infection_path = build_path(reports_path, f'time infection ({total_infected} infected users).txt')
+        with open(self.time_infection_path, 'w') as file:
+            file.writelines(time_and_infected)
+
+    def analysis(self):
         interval_size = self.dataset.hours_per_interval * 3600
 
-        time_infection = pd.read_csv(path_time_infection, names=['time', 'node'], delimiter=' ')
+        time_infection = pd.read_csv(self.time_infection_path, names=['time', 'node'], delimiter=' ')
         max_time = time_infection.time.max()
 
         interval_threshold = 0
@@ -31,12 +51,13 @@ class EpidemicAnalysis:
 
             previous_interval_infection = time_infection[time_infection.time < interval_threshold]
 
-            nodes_per_community, label_counts = self.check_infected_nodes_at_interval(interval_infection,
-                                                                                      interval)
+            nodes_per_community, label_counts = self.check_infected_nodes_at_interval(interval_infection, interval)
             previous_label_counts = self.check_previous_intervals(previous_interval_infection, interval)
             self.check_next_interval(interval_infection, next_interval_infection, interval)
 
-            stacked_columns(nodes_per_community, label_counts, previous_label_counts, interval)
+            path = self.time_infection_path.replace('.txt', '')
+            mkdir(path)
+            stacked_columns(nodes_per_community, label_counts, previous_label_counts, interval, path)
 
             interval_threshold += interval_size
             interval += 1
@@ -91,7 +112,10 @@ class EpidemicAnalysis:
 
             current_nodes_in_next_clusters = filtered_current[['node', 'label']]
 
-            percent = (len(current_nodes_in_next_clusters) / len(merged_current)) * 100
+            if len(merged_current) > 0:
+                percent = (len(current_nodes_in_next_clusters) / len(merged_current)) * 100
+            else:
+                percent = 0
 
             print(f'{len(current_nodes_in_next_clusters)} of the {len(interval_infection)} nodes infected in '
                   f'interval {interval} ({round(percent, 2)}%) will be in the same communities as nodes that will '
@@ -103,5 +127,16 @@ class EpidemicAnalysis:
                         dtype=int)
         k = ks[self.choice_index]
         labels_path = build_path(interval_path, labels_for_k())
-        user_labels_mapping = pd.read_csv(build_path(labels_path, f'k_{k}.txt'), names=['label', 'node'], delimiter=' ')
+        user_labels_mapping = self.read_rewrite_mapping(labels_path, k)
+        return user_labels_mapping
+
+    @staticmethod
+    def read_rewrite_mapping(labels_path, k):
+        path = build_path(labels_path, f'k_{k}.txt')
+        user_labels_mapping = pd.read_csv(path, names=['label', 'node'], header=None, delimiter=' ')
+
+        if user_labels_mapping['node'].dtype == object:
+            node_column = user_labels_mapping['node'].str.replace('.txt', '', regex=False)
+            node_column = node_column.str.replace('.csv', '', regex=False).str[1:]
+            user_labels_mapping['node'] = node_column.astype('int64')
         return user_labels_mapping
