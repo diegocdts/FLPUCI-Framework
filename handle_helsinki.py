@@ -1,4 +1,4 @@
-from scripts_4_new_dataset.new_dataset import NewDataset
+from helpful_scripts.new_dataset import NewDataset
 
 path = '/home/diegocdts/eclipse/eclipse-workspace/One6/src/reports/default_scenario_MovementNs2Report.txt'
 
