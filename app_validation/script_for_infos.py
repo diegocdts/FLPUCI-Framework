@@ -28,7 +28,6 @@ class StrategyInfos:
             k = ks[self.choice_index]
             labels_for_k_path = build_path(interval_path, labels_for_k())
             source_path = build_path(labels_for_k_path, f'k_{k}.txt')
-            print(interval, source_path)
             destination_path = build_path(self.f9_community_id_maps, f'{interval}.txt')
             shutil.copy(source_path, destination_path)
 
