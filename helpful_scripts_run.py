@@ -1,3 +1,5 @@
-from helpful_scripts.fix_labels_for_k_contents import fix_contents
+from app_validation.opportunistic_routing import RoutingMetricAnalysis
 
-fix_contents()
+rma = RoutingMetricAnalysis('/home/diegocdts/eclipse/eclipse-workspace/One6/src/reports')
+
+rma.metrics()

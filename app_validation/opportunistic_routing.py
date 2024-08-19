@@ -1,14 +1,18 @@
-import os
-
+import os.path
 from collections import defaultdict
 
+import numpy as np
+
+from app_validation.plots import plot_opportunistic_routing_metric
 from inner_functions.path import build_path
 
 
 class RoutingMetricAnalysis:
 
     def __init__(self, report_root):
-        self.protocols = ['epidemic', 'prophet', 'pc']
+        self.report_root = report_root
+
+        self.protocols = ['epidemic', 'pr', 'pc']
 
         self.reports_path = [build_path(report_root, protocol) for protocol in self.protocols]
 
@@ -16,9 +20,11 @@ class RoutingMetricAnalysis:
 
         self.reports = ['CreatedMessagesReport', 'DeliveredMessagesReport', 'EventLogReport']
 
-        self.loads = ['load_0.25', 'load_0.5', 'load_0.75', 'load_1']
+        self.loads = ['load_1', 'load_2', 'load_3', 'load_4', 'load_5']
+        self.loads = self.loads[::-1]
+        self.x_ticks = ['30s - 60s', '20s - 30s', '10s - 20s', '5s - 10s', '0s - 5s']
 
-        self.prefixes = ['pfxM', 'pfxI', 'pfxT', 'pfxW']
+        self.prefixes = ['pfxA', 'pfxB', 'pfxC', 'pfxD', 'pfxE']
 
         self.all_paths = self.set_dict_paths()
 
@@ -44,39 +50,54 @@ class RoutingMetricAnalysis:
         relayed_dict = defaultdict(dict)
 
         for index_router, (router_name, router_dict) in enumerate(self.all_paths.items()):
-            for index_report, (report_name, load_dict) in enumerate(router_dict.items()):
+            for index_report, (report_name, report_dict) in enumerate(router_dict.items()):
                 protocol_dict = defaultdict(list)
                 protocol_dict1 = defaultdict(list)
                 protocol_dict2 = defaultdict(list)
-                for load_name, paths_list in load_dict.items():
+                for load_name, paths_list in report_dict.items():
                     for path in paths_list:
-                        with open(path, 'r') as file:
-                            lines = file.readlines()[1:]
-                            if report_name == self.reports[0]:
-                                num_created = len(lines)
-                                protocol_dict[load_name].append(num_created)
-                                created_dict[router_name] = protocol_dict
-                            if report_name == self.reports[1]:
-                                num_delivered = len(lines)
-                                hops = []
-                                latencies = []
-                                for line in lines:
-                                    split = line.split(' ')
-                                    hops.append(int(split[3]))
-                                    latencies.append(round(float(split[4]), 2))
-                                protocol_dict[load_name].append(num_delivered)
-                                protocol_dict1[load_name].append(hops)
-                                protocol_dict2[load_name].append(latencies)
+                        if os.path.exists(path):
+                            with open(path, 'r') as file:
+                                lines = file.readlines()[1:]
+                                if report_name == self.reports[0]:
+                                    num_created = len(lines)
+                                    protocol_dict[load_name].append(num_created)
+                                    created_dict[router_name] = protocol_dict
+                                if report_name == self.reports[1]:
+                                    num_delivered = len(lines)
+                                    hops = []
+                                    latencies = []
+                                    for line in lines:
+                                        split = line.split(' ')
+                                        hops.append(int(split[3]))
+                                        latencies.append(round(float(split[4]), 2))
+                                    protocol_dict[load_name].append(num_delivered)
 
-                                delivered_dict[router_name] = protocol_dict
-                                hops_dict[router_name] = protocol_dict1
-                                latency_dict[router_name] = protocol_dict2
-                            if report_name == self.reports[2]:
-                                relays = 0
-                                for line in lines:
-                                    if line.endswith(' R\n'):
-                                        relays += 1
-                                    elif line.endswith(' D\n'):
-                                        break
-                                protocol_dict[load_name].append(relays)
-                                relayed_dict[router_name] = protocol_dict
+                                    protocol_dict1[load_name] += hops
+                                    protocol_dict2[load_name] += latencies
+
+                                    delivered_dict[router_name] = protocol_dict
+                                    hops_dict[router_name] = protocol_dict1
+                                    latency_dict[router_name] = protocol_dict2
+                                if report_name == self.reports[2]:
+                                    relays = 0
+                                    for line in lines:
+                                        if line.endswith(' R\n'):
+                                            relays += 1
+                                    protocol_dict[load_name].append(relays)
+                                    relayed_dict[router_name] = protocol_dict
+        delivery_prob = delivered_dict
+        overhead = relayed_dict
+
+        for router_name, router_dict in delivered_dict.items():
+            for load_name, load_list in router_dict.items():
+                delivered = np.array(delivery_prob[router_name][load_name])
+                created = np.array(created_dict[router_name][load_name])
+                relayed = np.array(relayed_dict[router_name][load_name])
+                delivery_prob[router_name][load_name] = delivered/created
+                overhead[router_name][load_name] = (relayed-(created+delivered))/delivered
+
+        plot_opportunistic_routing_metric(delivery_prob, self.x_ticks, 'Delivery Probability', self.report_root)
+        plot_opportunistic_routing_metric(overhead, self.x_ticks, 'Overhead', self.report_root)
+        plot_opportunistic_routing_metric(hops_dict, self.x_ticks, 'Avg hops', self.report_root)
+        plot_opportunistic_routing_metric(latency_dict, self.x_ticks, 'Latency', self.report_root)

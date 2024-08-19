@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
-from inner_functions.path import interval_dir
+from scipy import stats
+from inner_functions.path import interval_dir, build_path
 
 
 def stacked_columns(current_nodes_per_community, current_label_counts,
@@ -39,4 +41,33 @@ def stacked_columns(current_nodes_per_community, current_label_counts,
     plt.xticks(rotation=45)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(f'{path}/{interval_dir(interval)}.pdf')
+    plt.savefig(f'{path}/{interval_dir(interval)}.png')
+    plt.close()
+
+
+def plot_opportunistic_routing_metric(metric: dict, x_ticks: list, title: str, path: str):
+    plt.figure(figsize=(5, 6))
+    for router_name, router_dict in metric.items():
+        means = []
+        lower_bounds = []
+        upper_bounds = []
+        for load_name, load_list in router_dict.items():
+            mean = np.mean(load_list)
+            conf_interval = stats.norm.interval(0.95, loc=mean, scale=stats.sem(load_list))
+            means.append(mean)
+            lower_bounds.append(conf_interval[0])
+            upper_bounds.append(conf_interval[1])
+        means = np.array(means)
+        lower_bounds = np.array(lower_bounds)
+        upper_bounds = np.array(upper_bounds)
+        x = [i for i in range(len(x_ticks))]
+        plt.errorbar(x, means, yerr=[means-lower_bounds, upper_bounds-means], label=router_name,
+                      linewidth=2, capsize=6, capthick=2)
+        plt.xticks(x, x_ticks)
+    plt.xlabel('Interval between messages')
+    plt.ylabel(title)
+    plt.suptitle(title)
+    plt.legend()
+    #plt.show()
+    plt.savefig(build_path(path, f'{title}.pdf'))
+    plt.close()
