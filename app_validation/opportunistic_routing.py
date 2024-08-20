@@ -2,6 +2,7 @@ import os.path
 from collections import defaultdict
 
 import numpy as np
+import pandas as pd
 
 from app_validation.plots import plot_opportunistic_routing_metric
 from inner_functions.path import build_path
@@ -73,8 +74,8 @@ class RoutingMetricAnalysis:
                                         latencies.append(round(float(split[4]), 2))
                                     protocol_dict[load_name].append(num_delivered)
 
-                                    protocol_dict1[load_name] += hops
-                                    protocol_dict2[load_name] += latencies
+                                    protocol_dict1[load_name] += remove_outliers(hops)
+                                    protocol_dict2[load_name] += remove_outliers(latencies)
 
                                     delivered_dict[router_name] = protocol_dict
                                     hops_dict[router_name] = protocol_dict1
@@ -101,3 +102,20 @@ class RoutingMetricAnalysis:
         plot_opportunistic_routing_metric(overhead, self.x_ticks, 'Overhead', self.report_root)
         plot_opportunistic_routing_metric(hops_dict, self.x_ticks, 'Avg hops', self.report_root)
         plot_opportunistic_routing_metric(latency_dict, self.x_ticks, 'Latency', self.report_root)
+
+
+def remove_outliers(data):
+    data = {'values': data}
+    df = pd.DataFrame(data)
+
+    q1 = df['values'].quantile(0.25)
+    q3 = df['values'].quantile(0.75)
+
+    iqr = q3 - q1
+
+    lower_bound = q1 - 1.5 * iqr
+    upper_bound = q3 + 1.5 * iqr
+
+    df_clean = df[(df['values'] >= lower_bound) & (df['values'] <= upper_bound)]
+
+    return df_clean['values'].to_numpy().tolist()
