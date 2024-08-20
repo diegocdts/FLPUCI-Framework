@@ -3,7 +3,7 @@ from collections import namedtuple
 
 from inner_types.learning import LearningApproach, WindowStrategy, WindowStrategyType
 from instances.data import sfc, rt, ngsim, helsinki
-from instances.learning import cen_parameters, fed_parameters, sfc_rt_helsinki_properties, ngsim_properties
+from instances.learning import cen_parameters, fed_parameters, sfc_rt_properties, helsinki_properties, ngsim_properties
 
 
 def arguments():
@@ -64,13 +64,14 @@ def arguments():
 
     parsed = parser.parse_args()
 
-    properties = sfc_rt_helsinki_properties
+    properties = sfc_rt_properties
     if parsed.dataset == 'sfc':
         dataset = sfc
     elif parsed.dataset == 'rt':
         dataset = rt
     elif parsed.dataset == 'helsinki':
         dataset = helsinki
+        properties = helsinki_properties
     else:
         dataset = ngsim
         properties = ngsim_properties

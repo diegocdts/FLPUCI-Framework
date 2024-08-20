@@ -1,14 +1,24 @@
 from inner_types.learning import FCAEProperties, TrainingParameters
 
-sfc_rt_helsinki_properties = FCAEProperties(input_shape=(40, 40, 1),
-                                            encode_layers=[128, 64, 32],
-                                            encode_activation='relu',
-                                            decode_activation='relu',
-                                            kernel_size=(3, 3),
-                                            encode_strides=[2, 2, 2],
-                                            padding='same',
-                                            latent_space=100,
-                                            learning_rate=0.0005)
+sfc_rt_properties = FCAEProperties(input_shape=(40, 40, 1),
+                                   encode_layers=[128, 64, 32],
+                                   encode_activation='relu',
+                                   decode_activation='relu',
+                                   kernel_size=(3, 3),
+                                   encode_strides=[2, 2, 2],
+                                   padding='same',
+                                   latent_space=100,
+                                   learning_rate=0.0005)
+
+helsinki_properties = FCAEProperties(input_shape=(32, 40, 1),
+                                     encode_layers=[128, 64, 32],
+                                     encode_activation='relu',
+                                     decode_activation='relu',
+                                     kernel_size=(3, 3),
+                                     encode_strides=[2, 2, 2],
+                                     padding='same',
+                                     latent_space=100,
+                                     learning_rate=0.0005)
 
 ngsim_properties = FCAEProperties(input_shape=(4, 56, 1),
                                   encode_layers=[16, 8],
