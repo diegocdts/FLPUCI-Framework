@@ -57,17 +57,17 @@ def plot_opportunistic_routing_metric(metric: dict, x_ticks: list, title: str, p
             means.append(mean)
             lower_bounds.append(conf_interval[0])
             upper_bounds.append(conf_interval[1])
-        means = np.array(means)
         lower_bounds = np.array(lower_bounds)
         upper_bounds = np.array(upper_bounds)
         x = [i for i in range(len(x_ticks))]
         plt.errorbar(x, means, yerr=[means-lower_bounds, upper_bounds-means], label=router_name,
                       linewidth=2, capsize=6, capthick=2)
+        for index, value in enumerate(means):
+            plt.text(x[index], value, f'{round(value, 2)}')
         plt.xticks(x, x_ticks)
     plt.xlabel('Interval between messages')
     plt.ylabel(title)
     plt.suptitle(title)
     plt.legend()
-    #plt.show()
-    plt.savefig(build_path(path, f'{title}.pdf'))
+    plt.savefig(build_path(path, f'{title}.png'))
     plt.close()

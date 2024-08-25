@@ -36,4 +36,5 @@ helsinki = Dataset(name='helsinki',
                    resolution=(110, 110),
                    is_lat_lon=False,
                    paddingYX=(False, False),
-                   attribute_indexes=LatYLonXTimeIndexes(1, 0, 3))
+                   attribute_indexes=LatYLonXTimeIndexes(1, 0, 3),
+                   k_candidates=30)
