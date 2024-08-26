@@ -17,50 +17,56 @@ class EpidemicAnalysis:
         self.time_infection_path = ''
 
     def generate_time_infection(self, reports_path, file_name):
-        self.reports_path = reports_path
-        file_path = build_path(reports_path, file_name)
-        time_and_infected = ''
-        with open(file_path, 'r') as file:
-            lines = file.readlines()
-            lines = [line for line in lines if line.__contains__(' R\n') or line.endswith(' D\n')]
-            total_infected = len(lines)
-            for line in lines:
-                split = line.split(' ')
-                time = round(float(split[0]), 2)
-                infected = split[3]
-                new_line = f'{time} {infected}\n'
-                time_and_infected = f'{time_and_infected}{new_line}'
-        self.time_infection_path = build_path(reports_path, f'time infection ({total_infected} infected users).txt')
-        with open(self.time_infection_path, 'w') as file:
-            file.writelines(time_and_infected)
+        try:
+            self.reports_path = reports_path
+            file_path = build_path(reports_path, file_name)
+            time_and_infected = ''
+            with open(file_path, 'r') as file:
+                lines = file.readlines()
+                lines = [line for line in lines if line.__contains__(' R\n') or line.endswith(' D\n')]
+                total_infected = len(lines)
+                for line in lines:
+                    split = line.split(' ')
+                    time = round(float(split[0]), 2)
+                    infected = split[3]
+                    new_line = f'{time} {infected}\n'
+                    time_and_infected = f'{time_and_infected}{new_line}'
+            self.time_infection_path = build_path(reports_path, f'time infection ({total_infected} infected users).txt')
+            with open(self.time_infection_path, 'w') as file:
+                file.writelines(time_and_infected)
+        except FileNotFoundError as e:
+            print(e)
 
     def analysis(self):
-        interval_size = self.dataset.hours_per_interval * 3600
+        try:
+            interval_size = self.dataset.hours_per_interval * 3600
 
-        time_infection = pd.read_csv(self.time_infection_path, names=['time', 'node'], delimiter=' ')
-        max_time = time_infection.time.max()
+            time_infection = pd.read_csv(self.time_infection_path, names=['time', 'node'], delimiter=' ')
+            max_time = time_infection.time.max()
 
-        interval_threshold = 0
-        interval = 0
+            interval_threshold = 0
+            interval = 0
 
-        while interval_threshold + interval_size < max_time:
-            interval_infection = time_infection[(interval_threshold <= time_infection.time) &
-                                                (time_infection.time < interval_threshold + interval_size)]
-            next_interval_infection = time_infection[(interval_threshold + interval_size <= time_infection.time) &
-                                                     (time_infection.time < interval_threshold + (2 * interval_size))]
+            while interval_threshold + interval_size < max_time:
+                interval_infection = time_infection[(interval_threshold <= time_infection.time) &
+                                                    (time_infection.time < interval_threshold + interval_size)]
+                next_interval_infection = time_infection[(interval_threshold + interval_size <= time_infection.time) &
+                                                         (time_infection.time < interval_threshold + (2 * interval_size))]
 
-            previous_interval_infection = time_infection[time_infection.time < interval_threshold]
+                previous_interval_infection = time_infection[time_infection.time < interval_threshold]
 
-            nodes_per_community, label_counts = self.check_infected_nodes_at_interval(interval_infection, interval)
-            previous_label_counts = self.check_previous_intervals(previous_interval_infection, interval)
-            self.check_next_interval(interval_infection, next_interval_infection, interval)
+                nodes_per_community, label_counts = self.check_infected_nodes_at_interval(interval_infection, interval)
+                previous_label_counts = self.check_previous_intervals(previous_interval_infection, interval)
+                self.check_next_interval(interval_infection, next_interval_infection, interval)
 
-            path = self.time_infection_path.replace('.txt', '')
-            mkdir(path)
-            stacked_columns(nodes_per_community, label_counts, previous_label_counts, interval, path)
+                path = self.time_infection_path.replace('.txt', '')
+                mkdir(path)
+                stacked_columns(nodes_per_community, label_counts, previous_label_counts, interval, path)
 
-            interval_threshold += interval_size
-            interval += 1
+                interval_threshold += interval_size
+                interval += 1
+        except FileNotFoundError as e:
+            print(e)
 
     def check_infected_nodes_at_interval(self, interval_infection: pd.DataFrame, interval: int,
                                          is_previous: bool = False):
