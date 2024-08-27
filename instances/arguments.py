@@ -2,8 +2,9 @@ import argparse
 from collections import namedtuple
 
 from inner_types.learning import LearningApproach, WindowStrategy, WindowStrategyType
-from instances.data import sfc, rt, ngsim, helsinki
-from instances.learning import cen_parameters, fed_parameters, sfc_rt_properties, helsinki_properties, ngsim_properties
+from instances.data import sfc, rt, ngsim, helsinki, manhattan
+from instances.learning import cen_parameters, fed_parameters, sfc_rt_properties, helsinki_properties, ngsim_properties, \
+    manhattan_properties
 
 
 def arguments():
@@ -72,6 +73,9 @@ def arguments():
     elif parsed.dataset == 'helsinki':
         dataset = helsinki
         properties = helsinki_properties
+    elif parsed.dataset == 'manhattan':
+        dataset = manhattan
+        properties = manhattan_properties
     else:
         dataset = ngsim
         properties = ngsim_properties
