@@ -65,7 +65,7 @@ def plot_opportunistic_routing_metric(metric: dict, x_ticks: list, title: str, p
         for index, value in enumerate(means):
             plt.text(x[index], value, f'{round(value, 2)}')
         plt.xticks(x, x_ticks)
-    plt.xlabel('Interval between messages')
+    plt.xlabel('TTL (minutes)')
     plt.ylabel(title)
     plt.suptitle(title)
     plt.legend()

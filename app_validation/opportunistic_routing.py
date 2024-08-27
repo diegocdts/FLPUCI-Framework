@@ -13,7 +13,7 @@ class RoutingMetricAnalysis:
     def __init__(self, report_root):
         self.report_root = report_root
 
-        self.protocols = ['epidemic', 'pr', 'pc']
+        self.protocols = ['EpidemicRouter', 'ProphetRouter', 'PCRouter']
 
         self.reports_path = [build_path(report_root, protocol) for protocol in self.protocols]
 
@@ -21,8 +21,12 @@ class RoutingMetricAnalysis:
 
         self.reports = ['CreatedMessagesReport', 'DeliveredMessagesReport', 'EventLogReport']
 
-        self.loads = ['load_5', 'load_3', 'load_1']
-        self.x_ticks = ['60s', '30s', '5s']
+        if 'manhattan' in report_root:
+            self.ttl_values = [45, 90, 135, 180]
+            self.ttls = [f'ttl_{value}' for value in self.ttl_values]
+        else:
+            self.ttl_values = [30, 60, 90, 120]
+            self.ttls = [f'ttl_{value}' for value in self.ttl_values]
 
         self.prefixes = ['pfxA', 'pfxB', 'pfxC']
 
@@ -33,12 +37,12 @@ class RoutingMetricAnalysis:
         for index, router in enumerate(self.routers):
             report_dict = defaultdict(dict)
             for report in self.reports:
-                for load in self.loads:
+                for ttl in self.ttls:
                     files_name = []
                     for prefix in self.prefixes:
-                        file_name = build_path(self.reports_path[index], f'{router}_{load}_{prefix}_{report}.txt')
+                        file_name = build_path(self.reports_path[index], f'{router}_{prefix}_{ttl}_{report}.txt')
                         files_name.append(file_name)
-                    report_dict[report][load] = files_name
+                    report_dict[report][ttl] = files_name
                 router_paths[router] = report_dict
         return router_paths
 
@@ -54,14 +58,15 @@ class RoutingMetricAnalysis:
                 protocol_dict = defaultdict(list)
                 protocol_dict1 = defaultdict(list)
                 protocol_dict2 = defaultdict(list)
-                for load_name, paths_list in report_dict.items():
+                for ttl_name, paths_list in report_dict.items():
                     for path in paths_list:
+                        print(path)
                         if os.path.exists(path):
                             with open(path, 'r') as file:
                                 lines = file.readlines()[1:]
                                 if report_name == self.reports[0]:
                                     num_created = len(lines)
-                                    protocol_dict[load_name].append(num_created)
+                                    protocol_dict[ttl_name].append(num_created)
                                     created_dict[router_name] = protocol_dict
                                 if report_name == self.reports[1]:
                                     num_delivered = len(lines)
@@ -71,10 +76,10 @@ class RoutingMetricAnalysis:
                                         split = line.split(' ')
                                         hops.append(int(split[3]))
                                         latencies.append(round(float(split[4]), 2))
-                                    protocol_dict[load_name].append(num_delivered)
+                                    protocol_dict[ttl_name].append(num_delivered)
 
-                                    protocol_dict1[load_name] += remove_outliers(hops)
-                                    protocol_dict2[load_name] += remove_outliers(latencies)
+                                    protocol_dict1[ttl_name] += remove_outliers(hops)
+                                    protocol_dict2[ttl_name] += remove_outliers(latencies)
 
                                     delivered_dict[router_name] = protocol_dict
                                     hops_dict[router_name] = protocol_dict1
@@ -84,25 +89,24 @@ class RoutingMetricAnalysis:
                                     for line in lines:
                                         if line.endswith(' R\n'):
                                             relays += 1
-                                    protocol_dict[load_name].append(relays)
+                                    protocol_dict[ttl_name].append(relays)
                                     relayed_dict[router_name] = protocol_dict
         delivery_prob = delivered_dict
         overhead = relayed_dict
 
         for router_name, router_dict in delivered_dict.items():
-            for load_name, load_list in router_dict.items():
-                delivered = np.array(delivery_prob[router_name][load_name])
-                created = np.array(created_dict[router_name][load_name])
-                relayed = np.array(relayed_dict[router_name][load_name])
-                print(f'{load_name} {delivered} / {created} = {delivered/created}')
-                delivery_prob[router_name][load_name] = delivered/created
-                overhead[router_name][load_name] = (relayed-(created+delivered))/delivered
+            for ttl_name, ttl_list in router_dict.items():
+                delivered = np.array(delivery_prob[router_name][ttl_name])
+                created = np.array(created_dict[router_name][ttl_name])
+                relayed = np.array(relayed_dict[router_name][ttl_name])
+                print(f'{ttl_name} {delivered} / {created} = {delivered/created}')
+                delivery_prob[router_name][ttl_name] = delivered/created
+                overhead[router_name][ttl_name] = (relayed-(created+delivered))/delivered
 
-        plot_opportunistic_routing_metric(delivery_prob, self.x_ticks, 'Delivery Probability', self.report_root)
-        plot_opportunistic_routing_metric(overhead, self.x_ticks, 'Overhead', self.report_root)
-        plot_opportunistic_routing_metric(hops_dict, self.x_ticks, 'Avg hops', self.report_root)
-        plot_opportunistic_routing_metric(latency_dict, self.x_ticks, 'Latency', self.report_root)
-
+        plot_opportunistic_routing_metric(delivery_prob, self.ttl_values, 'Delivery Probability', self.report_root)
+        plot_opportunistic_routing_metric(overhead, self.ttl_values, 'Overhead', self.report_root)
+        plot_opportunistic_routing_metric(hops_dict, self.ttl_values, 'Avg hops', self.report_root)
+        plot_opportunistic_routing_metric(latency_dict, self.ttl_values, 'Latency', self.report_root)
 
 def remove_outliers(data):
     data = {'values': data}

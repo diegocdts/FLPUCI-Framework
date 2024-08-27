@@ -9,5 +9,5 @@ nd = NewDataset('manhattan', '/home/diegocdts/eclipse/eclipse-workspace/One6/src
 nd.export_raw_data()
 """
 
-rma = RoutingMetricAnalysis('/home/diegocdts/eclipse/eclipse-workspace/One6/src/reports')
+rma = RoutingMetricAnalysis('/home/diegocdts/eclipse/eclipse-workspace/One6/src/reports/manhattan')
 rma.metrics()
