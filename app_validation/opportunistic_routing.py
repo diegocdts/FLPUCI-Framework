@@ -21,11 +21,10 @@ class RoutingMetricAnalysis:
 
         self.reports = ['CreatedMessagesReport', 'DeliveredMessagesReport', 'EventLogReport']
 
-        self.loads = ['load_1', 'load_2', 'load_3', 'load_4', 'load_5']
-        self.loads = self.loads[::-1]
-        self.x_ticks = ['30s - 60s', '20s - 30s', '10s - 20s', '5s - 10s', '0s - 5s']
+        self.loads = ['load_5', 'load_3', 'load_1']
+        self.x_ticks = ['60s', '30s', '5s']
 
-        self.prefixes = ['pfxA', 'pfxB', 'pfxC', 'pfxD', 'pfxE']
+        self.prefixes = ['pfxA', 'pfxB', 'pfxC']
 
         self.all_paths = self.set_dict_paths()
 
@@ -95,6 +94,7 @@ class RoutingMetricAnalysis:
                 delivered = np.array(delivery_prob[router_name][load_name])
                 created = np.array(created_dict[router_name][load_name])
                 relayed = np.array(relayed_dict[router_name][load_name])
+                print(f'{load_name} {delivered} / {created} = {delivered/created}')
                 delivery_prob[router_name][load_name] = delivered/created
                 overhead[router_name][load_name] = (relayed-(created+delivered))/delivered
 
