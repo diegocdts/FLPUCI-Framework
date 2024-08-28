@@ -11,3 +11,6 @@ nd.export_raw_data()
 
 rma = RoutingMetricAnalysis('/home/diegocdts/eclipse/eclipse-workspace/One6/src/reports/manhattan')
 rma.metrics()
+
+rma = RoutingMetricAnalysis('/home/diegocdts/eclipse/eclipse-workspace/One6/src/reports/helsinki')
+rma.metrics()
