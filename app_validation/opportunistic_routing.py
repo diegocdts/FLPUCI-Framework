@@ -13,11 +13,9 @@ class RoutingMetricAnalysis:
     def __init__(self, report_root):
         self.report_root = report_root
 
-        self.protocols = ['EpidemicRouter', 'ProphetRouter', 'PCRouter']
+        self.routers = ['Epidemic', 'Prophet', 'PC', 'Bubblerap']
 
-        self.reports_path = [build_path(report_root, protocol) for protocol in self.protocols]
-
-        self.routers = ['EpidemicRouter', 'ProphetRouter', 'PCRouter']
+        self.reports_path = [build_path(report_root, protocol) for protocol in self.routers]
 
         self.reports = ['CreatedMessagesReport', 'DeliveredMessagesReport', 'EventLogReport']
 
@@ -60,7 +58,6 @@ class RoutingMetricAnalysis:
                 protocol_dict2 = defaultdict(list)
                 for ttl_name, paths_list in report_dict.items():
                     for path in paths_list:
-                        print(path)
                         if os.path.exists(path):
                             with open(path, 'r') as file:
                                 lines = file.readlines()[1:]
@@ -99,14 +96,19 @@ class RoutingMetricAnalysis:
                 delivered = np.array(delivery_prob[router_name][ttl_name])
                 created = np.array(created_dict[router_name][ttl_name])
                 relayed = np.array(relayed_dict[router_name][ttl_name])
-                print(f'{ttl_name} {delivered} / {created} = {delivered/created}')
-                delivery_prob[router_name][ttl_name] = delivered/created
-                overhead[router_name][ttl_name] = (relayed-(created+delivered))/delivered
+                latency = np.array(latency_dict[router_name][ttl_name]) / 60
+                hops = np.array(hops_dict[router_name][ttl_name])
+
+                delivery_prob[router_name][ttl_name] = (delivered / created)
+                latency_dict[router_name][ttl_name] = latency
+                hops_dict[router_name][ttl_name] = hops
+
+                overhead[router_name][ttl_name] = (relayed-delivered)/delivered
 
         plot_opportunistic_routing_metric(delivery_prob, self.ttl_values, 'Delivery Probability', self.report_root)
         plot_opportunistic_routing_metric(overhead, self.ttl_values, 'Overhead', self.report_root)
         plot_opportunistic_routing_metric(hops_dict, self.ttl_values, 'Avg hops', self.report_root)
-        plot_opportunistic_routing_metric(latency_dict, self.ttl_values, 'Latency', self.report_root)
+        plot_opportunistic_routing_metric(latency_dict, self.ttl_values, 'Latency (minutes)', self.report_root)
 
 def remove_outliers(data):
     data = {'values': data}
