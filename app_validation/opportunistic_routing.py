@@ -13,7 +13,7 @@ class RoutingMetricAnalysis:
     def __init__(self, report_root):
         self.report_root = report_root
 
-        self.routers = ['Epidemic', 'Prophet', 'PC', 'Bubblerap']
+        self.routers = ['Epidemic', 'Prophet', 'Bubblerap', 'PC']
 
         self.reports_path = [build_path(report_root, protocol) for protocol in self.routers]
 
@@ -26,8 +26,6 @@ class RoutingMetricAnalysis:
             self.ttl_values = [30, 60, 90, 120]
             self.ttls = [f'ttl_{value}' for value in self.ttl_values]
 
-        self.prefixes = ['pfxA', 'pfxB', 'pfxC']
-
         self.all_paths = self.set_dict_paths()
 
     def set_dict_paths(self):
@@ -36,10 +34,7 @@ class RoutingMetricAnalysis:
             report_dict = defaultdict(dict)
             for report in self.reports:
                 for ttl in self.ttls:
-                    files_name = []
-                    for prefix in self.prefixes:
-                        file_name = build_path(self.reports_path[index], f'{router}_{prefix}_{ttl}_{report}.txt')
-                        files_name.append(file_name)
+                    files_name = [build_path(self.reports_path[index], f'{router}_{ttl}_{report}.txt')]
                     report_dict[report][ttl] = files_name
                 router_paths[router] = report_dict
         return router_paths

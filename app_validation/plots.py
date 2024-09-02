@@ -62,8 +62,10 @@ def plot_opportunistic_routing_metric(metric: dict, x_ticks: list, title: str, p
         x = [i for i in range(len(x_ticks))]
         plt.errorbar(x, means, yerr=[means-lower_bounds, upper_bounds-means], label=router_name,
                       linewidth=2, capsize=6, capthick=2)
+        last_line = plt.gca().get_lines()[-1]
+        last_color = last_line.get_color()
         for index, value in enumerate(means):
-            plt.text(x[index], value, f'{round(value, 2)}')
+            plt.text(x[index], value, f'{round(value, 2)}', color=last_color)
         plt.xticks(x, x_ticks)
     plt.xlabel('TTL (minutes)')
     plt.ylabel(title)
