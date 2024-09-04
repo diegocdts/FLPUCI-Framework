@@ -19,12 +19,8 @@ class RoutingMetricAnalysis:
 
         self.reports = ['CreatedMessagesReport', 'DeliveredMessagesReport', 'EventLogReport']
 
-        if 'manhattan' in report_root:
-            self.ttl_values = [45, 90, 135, 180]
-            self.ttls = [f'ttl_{value}' for value in self.ttl_values]
-        else:
-            self.ttl_values = [30, 60, 90, 120]
-            self.ttls = [f'ttl_{value}' for value in self.ttl_values]
+        self.ttl_values = [30, 60, 90, 120]
+        self.ttls = [f'ttl_{value}' for value in self.ttl_values]
 
         self.all_paths = self.set_dict_paths()
 
