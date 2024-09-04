@@ -40,7 +40,7 @@ helsinki = Dataset(name='helsinki',
 
 manhattan = Dataset(name='manhattan',
                     time_as_epoch=False,
-                    hours_per_interval=0.25,
+                    hours_per_interval=0.166666667,
                     first_epoch=0, last_epoch=14400,
                     lat_y_min=0, lat_y_max=7000,
                     lon_x_min=0, lon_x_max=7000,
