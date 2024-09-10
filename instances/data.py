@@ -29,7 +29,7 @@ ngsim = Dataset(name='ngsim',
 
 helsinki = Dataset(name='helsinki',
                    time_as_epoch=False,
-                   hours_per_interval=0.166666667,
+                   hours_per_interval=0.666666667,
                    first_epoch=0, last_epoch=14400,
                    lat_y_min=0, lat_y_max=3400,
                    lon_x_min=0, lon_x_max=4500,
