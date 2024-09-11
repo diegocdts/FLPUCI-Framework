@@ -419,4 +419,5 @@ def plot_opportunistic_routing_metric(metric: dict, x_ticks: list, title: str, p
     plt.suptitle(title)
     plt.legend()
     plt.savefig(build_path(path, f'{title}.png'))
+    plt.savefig(build_path(path, f'{title}.pdf'))
     plt.close()
