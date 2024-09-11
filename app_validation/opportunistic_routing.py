@@ -4,7 +4,7 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 
-from app_validation.plots import plot_opportunistic_routing_metric
+from utils.plots import plot_opportunistic_routing_metric
 from inner_functions.path import build_path
 
 

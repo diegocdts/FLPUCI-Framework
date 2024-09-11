@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib import colors as mcolors
-from scipy import interpolate
+from scipy import interpolate, stats
 
 from inner_functions.names import sources, choice_method
 from inner_functions.path import build_path
@@ -390,3 +390,33 @@ def plot_existent_result(csv_path, results_path, k_candidates, png_name, axis_la
     ks_chosen = np.loadtxt(build_path(results_path, ExportedFiles.KS_CHOSEN.value))
     png_path = build_path(results_path, png_name)
     plot_metric(curve_dataframe, k_candidates, ks_chosen, axis_label, png_path)
+
+
+def plot_opportunistic_routing_metric(metric: dict, x_ticks: list, title: str, path: str):
+    plt.figure(figsize=(5, 6))
+    for router_name, router_dict in metric.items():
+        means = []
+        lower_bounds = []
+        upper_bounds = []
+        for load_name, load_list in router_dict.items():
+            mean = np.mean(load_list)
+            conf_interval = stats.norm.interval(0.95, loc=mean, scale=stats.sem(load_list))
+            means.append(mean)
+            lower_bounds.append(conf_interval[0])
+            upper_bounds.append(conf_interval[1])
+        lower_bounds = np.array(lower_bounds)
+        upper_bounds = np.array(upper_bounds)
+        x = [i for i in range(len(x_ticks))]
+        plt.errorbar(x, means, yerr=[means-lower_bounds, upper_bounds-means], label=router_name,
+                      linewidth=2, capsize=6, capthick=2)
+        last_line = plt.gca().get_lines()[-1]
+        last_color = last_line.get_color()
+        for index, value in enumerate(means):
+            plt.text(x[index], value, f'{round(value, 2)}', color=last_color)
+        plt.xticks(x, x_ticks)
+    plt.xlabel('TTL (minutes)')
+    plt.ylabel(title)
+    plt.suptitle(title)
+    plt.legend()
+    plt.savefig(build_path(path, f'{title}.png'))
+    plt.close()

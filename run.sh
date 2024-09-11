@@ -31,24 +31,24 @@ python experiment_script.py --dataset sfc --approach cen --strategy acc --last_i
 python experiment_script.py --dataset sfc --approach cen --strategy sli --last_interval 42
 
 elif [ "$1" == "helsinki" ]; then
-python experiment_script.py --dataset helsinki --approach fed --strategy acc --last_interval 12
-python experiment_script.py --dataset helsinki --approach fed --strategy sli --last_interval 12
+python experiment_script.py --dataset helsinki --approach fed --strategy acc --last_interval 3
+python experiment_script.py --dataset helsinki --approach fed --strategy sli --last_interval 3
 
-python experiment_script.py --dataset helsinki --approach fed --strategy acc --last_interval 12 --proximal_term 1.0
-python experiment_script.py --dataset helsinki --approach fed --strategy sli --last_interval 12 --proximal_term 1.0
+python experiment_script.py --dataset helsinki --approach fed --strategy acc --last_interval 3 --proximal_term 1.0
+python experiment_script.py --dataset helsinki --approach fed --strategy sli --last_interval 3 --proximal_term 1.0
 
-python experiment_script.py --dataset helsinki --approach cen --strategy acc --last_interval 12
-python experiment_script.py --dataset helsinki --approach cen --strategy sli --last_interval 12
+python experiment_script.py --dataset helsinki --approach cen --strategy acc --last_interval 3
+python experiment_script.py --dataset helsinki --approach cen --strategy sli --last_interval 3
 
 elif [ "$1" == "manhattan" ]; then
-python experiment_script.py --dataset manhattan --approach fed --strategy acc --last_interval 12
-python experiment_script.py --dataset manhattan --approach fed --strategy sli --last_interval 12
+python experiment_script.py --dataset manhattan --approach fed --strategy acc --last_interval 3
+python experiment_script.py --dataset manhattan --approach fed --strategy sli --last_interval 3
 
-python experiment_script.py --dataset manhattan --approach fed --strategy acc --last_interval 12 --proximal_term 1.0
-python experiment_script.py --dataset manhattan --approach fed --strategy sli --last_interval 12 --proximal_term 1.0
+python experiment_script.py --dataset manhattan --approach fed --strategy acc --last_interval 3 --proximal_term 1.0
+python experiment_script.py --dataset manhattan --approach fed --strategy sli --last_interval 3 --proximal_term 1.0
 
-python experiment_script.py --dataset manhattan --approach cen --strategy acc --last_interval 12
-python experiment_script.py --dataset manhattan --approach cen --strategy sli --last_interval 12
+python experiment_script.py --dataset manhattan --approach cen --strategy acc --last_interval 3
+python experiment_script.py --dataset manhattan --approach cen --strategy sli --last_interval 3
 
 else
     echo "Invalid parameter"
