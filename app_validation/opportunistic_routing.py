@@ -93,7 +93,6 @@ class RoutingMetricAnalysis:
                 delivery_prob[router_name][ttl_name] = (delivered / created)
                 latency_dict[router_name][ttl_name] = latency
                 hops_dict[router_name][ttl_name] = hops
-
                 overhead[router_name][ttl_name] = (relayed-delivered)/delivered
 
         plot_opportunistic_routing_metric(delivery_prob, self.ttl_values, 'Delivery Probability', self.report_root)
