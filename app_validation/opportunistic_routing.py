@@ -13,7 +13,7 @@ class RoutingMetricAnalysis:
     def __init__(self, report_root):
         self.report_root = report_root
 
-        self.routers = ['Epidemic', 'Bubblerap', 'PC']
+        self.routers = ['Epidemic', 'Bubblerap', 'PC - 40min update', 'PC - 20min update']
 
         self.reports_path = [build_path(report_root, protocol) for protocol in self.routers]
 
