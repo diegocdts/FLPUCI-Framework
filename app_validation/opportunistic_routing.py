@@ -19,7 +19,7 @@ class RoutingMetricAnalysis:
 
         self.reports = ['CreatedMessagesReport', 'DeliveredMessagesReport', 'EventLogReport']
 
-        self.ttl_values = [30, 60, 90, 120]
+        self.ttl_values = [30, 40, 50, 60]
         self.ttls = [f'ttl_{value}' for value in self.ttl_values]
 
         self.all_paths = self.set_dict_paths()
