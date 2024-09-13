@@ -51,26 +51,21 @@ class ExportTrace:
 
     def write_trace(self):
         df_final = pd.DataFrame(columns=['time', 'id', 'x', 'y'])
-        aux = pd.DataFrame(columns=['interval', 'x', 'y', 'time'])
-        initial_x = 100
-        initial_y = 12000
+        aux_initial = pd.DataFrame(columns=['id', 'x', 'y', 'time'])
+
+        initial_x = 100.0
+        initial_y = 12000.0
         initial_increment = 400
         initial_in_line = 0
 
         final_x = 100
-        final_y = 12000
+        final_y = 12000.0
         final_increment = 400
         final_in_line = 0
-        for index, file_name in enumerate(sorted_files(self.f2_data)):
-            # time id xPos yPos
-            file_path = build_path(self.f2_data, file_name)
-            df = pd.read_csv(file_path, sep=',')
 
-            df['id'] = self.mapping[file_name]
-            min_time_line = df[df['time'] == df['time'].min()].copy()
-            min_time_line['time'] = 0.0
-            min_time_line['x'] = initial_x
-            min_time_line['y'] = initial_y
+        # organiza todos os nós numa posição inicial
+        for index, file_name in enumerate(sorted_files(self.f2_data)):
+            min_time_line = pd.DataFrame(columns=['id', 'x', 'y', 'time'], data=[[index, initial_x, initial_y, 0.0]])
             if initial_in_line < 60:
                 initial_x += initial_increment
                 initial_in_line += 1
@@ -78,12 +73,25 @@ class ExportTrace:
                 initial_y += initial_increment
                 initial_x = 100
                 initial_in_line = 0
-            aux = pd.concat([aux, min_time_line])
+            aux_initial = pd.concat([aux_initial, min_time_line])
 
-            max_time_line = df[df['time'] == df['time'].max()].copy()
-            max_time_line['time'] = df['time'].max()
-            max_time_line['x'] = final_x
-            max_time_line['y'] = final_y
+        for index, file_name in enumerate(sorted_files(self.f2_data)):
+            # time id xPos yPos
+            file_path = build_path(self.f2_data, file_name)
+            df = pd.read_csv(file_path, sep=',')
+            df = df.sort_values(by='time', ascending=True).reset_index(drop=True)
+
+            df['id'] = self.mapping[file_name]
+            df_final = pd.concat([df_final, df[['time', 'id', 'x', 'y']]])
+
+        df_final['time'] = df_final['time'] - df_final['time'].min()
+        df_final = df_final[df_final['time'] <= 86400]
+        df_final = df_final.sort_values(by=['time', 'id'], ascending=[True, True]).reset_index(drop=True)
+
+        last_rows = df_final.groupby('id').tail(1)
+        for i, row in last_rows.iterrows():
+            new_row = pd.DataFrame({'time': [row.time], 'id': [row.id], 'x': [final_x], 'y': [final_y]})
+            df_final = pd.concat([df_final, new_row], ignore_index=True)
             if final_in_line < 60:
                 final_x += final_increment
                 final_in_line += 1
@@ -91,12 +99,8 @@ class ExportTrace:
                 final_y += final_increment
                 final_x = 100
                 final_in_line = 0
-            aux = pd.concat([aux, max_time_line])
 
-            df_final = pd.concat([df_final, df[['time', 'id', 'x', 'y']]])
-
-        df_final['time'] = df_final['time'] - df_final['time'].min()
-        df_final = pd.concat([df_final, aux[['time', 'id', 'x', 'y']]])
+        df_final = pd.concat([df_final, aux_initial[['time', 'id', 'x', 'y']]])
         df_final = df_final.sort_values(by=['time', 'id'], ascending=[True, True]).reset_index(drop=True)
         df_final = df_final[['time', 'id', 'x', 'y']]
         df_final.loc[df_final['y'] < 0, 'y'] = 0
