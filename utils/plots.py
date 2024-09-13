@@ -407,7 +407,11 @@ def plot_opportunistic_routing_metric(metric: dict, x_ticks: list, title: str, p
         lower_bounds = np.array(lower_bounds)
         upper_bounds = np.array(upper_bounds)
         x = [i for i in range(len(x_ticks))]
-        plt.errorbar(x, means, yerr=[means-lower_bounds, upper_bounds-means], label=router_name,
+        if 'PC' in router_name:
+            label = 'PC'
+        else:
+            label = router_name
+        plt.errorbar(x, means, yerr=[means-lower_bounds, upper_bounds-means], label=label,
                       linewidth=2, capsize=6, capthick=2)
         last_line = plt.gca().get_lines()[-1]
         last_color = last_line.get_color()
