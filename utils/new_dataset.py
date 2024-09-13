@@ -27,6 +27,7 @@ class ExportTrace:
 
     def __init__(self, dataset):
         self.dataset = dataset
+        self.root_dataset = Path.root_dataset(dataset.name)
         self.f2_data = Path.f2_data(dataset.name)
         self.mapping = dict()
         self.set_mapping()
@@ -58,14 +59,8 @@ class ExportTrace:
         initial_increment = 400
         initial_in_line = 0
 
-        final_x = 100
-        final_y = 12000.0
-        final_increment = 400
-        final_in_line = 0
-
-        # organiza todos os nós numa posição inicial
         for index, file_name in enumerate(sorted_files(self.f2_data)):
-            min_time_line = pd.DataFrame(columns=['id', 'x', 'y', 'time'], data=[[index, initial_x, initial_y, 0.0]])
+            min_time_line = pd.DataFrame(columns=['time', 'id', 'x', 'y'], data=[[0.0, index, initial_x, initial_y]])
             if initial_in_line < 60:
                 initial_x += initial_increment
                 initial_in_line += 1
@@ -86,12 +81,49 @@ class ExportTrace:
 
         df_final['time'] = df_final['time'] - df_final['time'].min()
         df_final = df_final[df_final['time'] <= 86400]
+        df_final = pd.concat([df_final, aux_initial[['time', 'id', 'x', 'y']]])
+
+        df_final.loc[df_final['x'] < 0, 'x'] = 0
+        df_final.loc[df_final['y'] < 0, 'y'] = 0
+        df_final['id'] = df_final['id'].astype(int)
+
+        df_final = df_final.sort_values(by=['id', 'time'])
+        df_final = df_final.groupby('id', group_keys=False).apply(filter_blocked_nodes)
+        
+        df_final = insert_final_position(df_final)
+
         df_final = df_final.sort_values(by=['time', 'id'], ascending=[True, True]).reset_index(drop=True)
 
-        last_rows = df_final.groupby('id').tail(1)
-        for i, row in last_rows.iterrows():
-            new_row = pd.DataFrame({'time': [row.time], 'id': [row.id], 'x': [final_x], 'y': [final_y]})
-            df_final = pd.concat([df_final, new_row], ignore_index=True)
+        with open(build_path(self.root_dataset, 'trace.txt'), 'w') as file:
+            file.write(f'{df_final["time"].min()} {df_final["time"].max()} '
+                       f'{df_final["x"].min()} {df_final["x"].max()} '
+                       f'{df_final["y"].min()} {df_final["y"].max()} '
+                       f'0.0 0.0\n')
+
+            df_final.to_csv(file, sep=' ', index=False, header=False)
+
+inter_record_threshold = 180
+
+def insert_final_position(df):
+    final_x = 100
+    final_y = 12000.0
+    final_increment = 400
+    final_in_line = 0
+
+    new_rows = []
+    for i in range(len(df) - 1):
+        new_rows.append(df.iloc[i])
+
+        time_n = df.iloc[i]['time']
+        time_n1 = df.iloc[i + 1]['time']
+
+        id_n = df.iloc[i]['id']
+        id_n1 = df.iloc[i + 1]['id']
+
+        if time_n1 - time_n > inter_record_threshold and id_n == id_n1:
+            new_row = pd.Series({'time': time_n + 2, 'id': id_n, 'x': final_x, 'y': final_y})
+
+            new_rows.append(new_row)
             if final_in_line < 60:
                 final_x += final_increment
                 final_in_line += 1
@@ -99,15 +131,18 @@ class ExportTrace:
                 final_y += final_increment
                 final_x = 100
                 final_in_line = 0
+    new_rows.append(df.iloc[-1])
 
-        df_final = pd.concat([df_final, aux_initial[['time', 'id', 'x', 'y']]])
-        df_final = df_final.sort_values(by=['time', 'id'], ascending=[True, True]).reset_index(drop=True)
-        df_final = df_final[['time', 'id', 'x', 'y']]
-        df_final.loc[df_final['y'] < 0, 'y'] = 0
-        df_final['id'] = df_final['id'].astype(int)
+    return pd.DataFrame(new_rows)
 
-        with open(build_path(self.f2_data, 'TRACE_SFC.txt'), 'w') as file:
-            file.write(f'{df_final["time"].min()} {df_final["time"].max()} {df_final["x"].min()} {df_final["x"].max()} '
-                       f'{df_final["y"].min()} {df_final["y"].max()} 0.0 0.0\n')
-
-            df_final.to_csv(file, sep=' ', index=False, header=False)
+def filter_blocked_nodes(group):
+    delta_xy = 300
+    indexes_to_remove = []
+    for i in range(len(group)):
+        for j in range(i + 1, len(group)):
+            if group['time'].iloc[j] - group['time'].iloc[i] > inter_record_threshold:
+                break
+            if (abs(group['x'].iloc[j] - group['x'].iloc[i]) < delta_xy
+                    or abs(group['y'].iloc[j] - group['y'].iloc[i]) < delta_xy):
+                indexes_to_remove.append(group.index[j])
+    return group.drop(indexes_to_remove)
