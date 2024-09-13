@@ -30,6 +30,10 @@ def labels_for_k():
 
 class Path:
     @staticmethod
+    def root_dataset(dataset: str):
+        return dir_exists_create('{}/'.format(dataset))
+
+    @staticmethod
     def f1_raw_data(dataset: str):
         return dir_exists_create('{}/f1_raw_data'.format(dataset))
 
