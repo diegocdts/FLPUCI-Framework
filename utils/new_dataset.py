@@ -45,7 +45,7 @@ class ExportTrace:
                 for line in lines:
                     split = line.split(' ')
                     label = split[0]
-                    node_name = split[1][1:].replace('\n', '')
+                    node_name = split[1].replace('\n', '')
                     new_content = f'{new_content}{label} {self.mapping[node_name]}\n'
             with open(file_path, 'w') as new_file:
                 new_file.write(new_content)
@@ -88,8 +88,7 @@ class ExportTrace:
         df_final['id'] = df_final['id'].astype(int)
 
         df_final = df_final.sort_values(by=['id', 'time'])
-        df_final = df_final.groupby('id', group_keys=False).apply(filter_blocked_nodes)
-        
+
         df_final = insert_final_position(df_final)
 
         df_final = df_final.sort_values(by=['time', 'id'], ascending=[True, True]).reset_index(drop=True)
@@ -134,15 +133,3 @@ def insert_final_position(df):
     new_rows.append(df.iloc[-1])
 
     return pd.DataFrame(new_rows)
-
-def filter_blocked_nodes(group):
-    delta_xy = 300
-    indexes_to_remove = []
-    for i in range(len(group)):
-        for j in range(i + 1, len(group)):
-            if group['time'].iloc[j] - group['time'].iloc[i] > inter_record_threshold:
-                break
-            if (abs(group['x'].iloc[j] - group['x'].iloc[i]) < delta_xy
-                    or abs(group['y'].iloc[j] - group['y'].iloc[i]) < delta_xy):
-                indexes_to_remove.append(group.index[j])
-    return group.drop(indexes_to_remove)
