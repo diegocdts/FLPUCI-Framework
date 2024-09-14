@@ -9,8 +9,8 @@ sfc = Dataset(name='sanfranciscocabs',
               attribute_indexes=LatYLonXTimeIndexes(0, 1, 3))
 
 rt = Dataset(name='romataxi',
-             hours_per_interval=3,
-             first_epoch=1391385600, last_epoch=1391817600,
+             hours_per_interval=4,
+             first_epoch=1391990400, last_epoch=1392422400,
              lat_y_min=41.84250, lat_y_max=41.94607,
              lon_x_min=12.42272, lon_x_max=12.56157,
              resolution=(300, 300),
