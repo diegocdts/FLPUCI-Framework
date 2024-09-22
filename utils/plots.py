@@ -425,3 +425,30 @@ def plot_opportunistic_routing_metric(metric: dict, x_ticks: list, title: str, p
     plt.savefig(build_path(path, f'{title}.png'))
     plt.savefig(build_path(path, f'{title}.pdf'))
     plt.close()
+
+
+def plot_node_participation(participation: dict, report_root: str):
+    plt.figure(figsize=(18, 6))
+    markers = ['x', 'P', '.']
+    color_list = [colors('green'), colors('orange'), colors('blue')]
+
+    for router_name, node_participation in participation.items():
+        x = np.arange(0, len(node_participation))
+        y = sorted(list(node_participation.values()))
+
+        color = color_list.pop()
+
+        if 'PC' in router_name:
+            label = 'PC'
+        else:
+            label = router_name
+        plt.stem(x, y, markerfmt=markers.pop(), linefmt=color, basefmt=color, label=label)
+
+        plt.xticks(np.arange(0, len(x)-1, 10))
+        plt.xlabel('User')
+        plt.ylabel('Participation as a forwarder')
+        plt.title('Ordered node participation')
+
+    plt.legend()
+    plt.savefig(build_path(report_root, 'Participation.png'))
+    plt.savefig(build_path(report_root, 'Participation.pdf'))

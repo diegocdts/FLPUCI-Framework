@@ -4,7 +4,7 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 
-from utils.plots import plot_opportunistic_routing_metric
+from utils.plots import plot_opportunistic_routing_metric, plot_node_participation
 from inner_functions.path import build_path
 
 
@@ -104,6 +104,25 @@ class RoutingMetricAnalysis:
         plot_opportunistic_routing_metric(overhead, self.ttl_values, 'Overhead', self.report_root)
         plot_opportunistic_routing_metric(hops_dict, self.ttl_values, 'Avg hops', self.report_root)
         plot_opportunistic_routing_metric(latency_dict, self.ttl_values, 'Latency (minutes)', self.report_root)
+
+    def node_participation(self):
+        participation = defaultdict(dict)
+        for index_router, (router_name, router_dict) in enumerate(self.all_paths.items()):
+            protocol_dict = defaultdict(int)
+            for index_report, (report_name, report_dict) in enumerate(router_dict.items()):
+                if report_name == self.reports[2]:
+                    for ttl_name, paths_list in report_dict.items():
+                        for path in paths_list:
+                            if os.path.exists(path) and '60' in ttl_name:
+                                with open(path, 'r') as file:
+                                    lines = [line for line in file.readlines() if line.endswith(' R\n')]
+                                    for line in lines:
+                                        split = line.split(' ')
+                                        node = split[2][1:]
+                                        protocol_dict[node] += 1
+            participation[router_name] = dict(sorted(protocol_dict.items()))
+        plot_node_participation(participation, self.report_root)
+
 
 def remove_outliers(data):
     data = {'values': data}
