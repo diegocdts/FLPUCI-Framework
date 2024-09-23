@@ -428,10 +428,11 @@ def plot_opportunistic_routing_metric(metric: dict, x_ticks: list, title: str, p
 
 
 def plot_node_participation(participation: dict, report_root: str):
-    plt.figure(figsize=(18, 6))
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(18, 12))  # 2 linhas, 1 coluna de gráficos (um em cima, outro embaixo)
     markers = ['x', 'P', '.']
     color_list = [colors('green'), colors('orange'), colors('blue')]
 
+    # Gráfico superior (ax1)
     for router_name, node_participation in participation.items():
         x = np.arange(0, len(node_participation))
         y = sorted(list(node_participation.values()))
@@ -442,13 +443,38 @@ def plot_node_participation(participation: dict, report_root: str):
             label = 'PC'
         else:
             label = router_name
-        plt.stem(x, y, markerfmt=markers.pop(), linefmt=color, basefmt=color, label=label)
+        ax1.stem(x, y, markerfmt=markers.pop(), linefmt=color, basefmt=color, label=label)
 
-        plt.xticks(np.arange(0, len(x)-1, 10))
-        plt.xlabel('User')
-        plt.ylabel('Participation as a forwarder')
-        plt.title('Ordered node participation')
+        ax1.set_xticks(np.arange(0, len(x)-1, 10))
+        ax1.set_xlabel('User')
+        ax1.set_ylabel('Participation as a forwarder')
+        ax1.set_title('Ordered node participation')
 
-    plt.legend()
+    ax1.legend()
+
+    markers = ['x', 'P', '.']
+    color_list = [colors('green'), colors('orange'), colors('blue')]
+
+    # Gráfico inferior (ax2) com y entre 0 e 1000
+    for router_name, node_participation in participation.items():
+        x = np.arange(0, len(node_participation))
+        y = sorted(list(node_participation.values()))
+
+        color = color_list.pop()
+        if 'PC' in router_name:
+            label = 'PC'
+        else:
+            label = router_name
+        ax2.stem(x, y, markerfmt=markers.pop(), linefmt=color, basefmt=color, label=label)
+
+        ax2.set_xticks(np.arange(0, len(x)-1, 10))
+        ax2.set_ylim(0, 2500)  # Definindo o limite de 0 a 100 no eixo Y
+        ax2.set_xlabel('User')
+        ax2.set_ylabel('Participation as a forwarder')
+        ax2.set_title('Ordered node participation (Y-axis limited to 100)')
+
+    ax2.legend()
+
+    plt.tight_layout()
     plt.savefig(build_path(report_root, 'Participation.png'))
     plt.savefig(build_path(report_root, 'Participation.pdf'))
