@@ -407,11 +407,8 @@ def plot_opportunistic_routing_metric(metric: dict, x_ticks: list, title: str, p
         lower_bounds = np.array(lower_bounds)
         upper_bounds = np.array(upper_bounds)
         x = [i for i in range(len(x_ticks))]
-        if 'PC' in router_name:
-            label = 'PC'
-        else:
-            label = router_name
-        plt.errorbar(x, means, yerr=[means-lower_bounds, upper_bounds-means], label=label,
+
+        plt.errorbar(x, means, yerr=[means-lower_bounds, upper_bounds-means], label=router_name,
                       linewidth=2, capsize=6, capthick=2)
         last_line = plt.gca().get_lines()[-1]
         last_color = last_line.get_color()
@@ -439,11 +436,7 @@ def plot_node_participation(participation: dict, report_root: str):
 
         color = color_list.pop()
 
-        if 'PC' in router_name:
-            label = 'PC'
-        else:
-            label = router_name
-        ax1.stem(x, y, markerfmt=markers.pop(), linefmt=color, basefmt=color, label=label)
+        ax1.stem(x, y, markerfmt=markers.pop(), linefmt=color, basefmt=color, label=router_name)
 
         ax1.set_xticks(np.arange(0, len(x)-1, 10))
         ax1.set_xlabel('User')
@@ -461,14 +454,10 @@ def plot_node_participation(participation: dict, report_root: str):
         y = sorted(list(node_participation.values()))
 
         color = color_list.pop()
-        if 'PC' in router_name:
-            label = 'PC'
-        else:
-            label = router_name
-        ax2.stem(x, y, markerfmt=markers.pop(), linefmt=color, basefmt=color, label=label)
+        ax2.stem(x, y, markerfmt=markers.pop(), linefmt=color, basefmt=color, label=router_name)
 
         ax2.set_xticks(np.arange(0, len(x)-1, 10))
-        ax2.set_ylim(0, 2500)  # Definindo o limite de 0 a 100 no eixo Y
+        ax2.set_ylim(0, 1000) # zoom
         ax2.set_xlabel('User')
         ax2.set_ylabel('Participation as a forwarder')
         ax2.set_title('Ordered node participation (Y-axis limited to 100)')

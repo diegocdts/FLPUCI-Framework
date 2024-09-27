@@ -13,11 +13,10 @@ class RoutingMetricAnalysis:
     def __init__(self, report_root):
         self.report_root = report_root
 
+        self.routers = ['Epidemic', 'Bubblerap', 'PCU']
         if '/sfc' in self.report_root or '/rt' in self.report_root:
-            self.routers = ['Epidemic', 'Bubblerap', 'PC - 4h update']
             self.ttl_values = [180, 360, 540, 720]
         else:
-            self.routers = ['Epidemic', 'Bubblerap', 'PC - 40min update']
             self.ttl_values = [30, 40, 50, 60]
 
 
