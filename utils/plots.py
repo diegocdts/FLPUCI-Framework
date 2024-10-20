@@ -467,3 +467,23 @@ def plot_node_participation(participation: dict, report_root: str):
     plt.tight_layout()
     plt.savefig(build_path(report_root, 'Participation.png'))
     plt.savefig(build_path(report_root, 'Participation.pdf'))
+
+def plot_intra_prob_delivery(intra_prob_delivery, nodes, path):
+    x = np.arange(intra_prob_delivery.shape[1] + 1)
+    x_ticks = ['']
+    x_ticks += [f'Interval {i}' for i in range(len(x) - 1)]
+
+    plt.boxplot(intra_prob_delivery)
+
+    probs = [max(p) for p in intra_prob_delivery.T]
+    print(probs)
+
+    for node, interval, max_prob in zip(nodes, x, probs):
+        plt.annotate(f'{node} nodes', xy=(interval+1, max_prob), xytext=(-25, 5), textcoords='offset points')
+
+    plt.xticks(x, x_ticks)
+    plt.xlabel('INTERVAL')
+    plt.ylabel('Intra-community Delivery Probability')
+    plt.savefig(build_path(path, 'Delivery Probability.png'))
+    plt.savefig(build_path(path, 'Delivery Probability.pdf'))
+    plt.close()
