@@ -1,10 +1,11 @@
+import glob
 import os.path
 from collections import defaultdict
 
 import numpy as np
 import pandas as pd
 
-from utils.plots import plot_opportunistic_routing_metric, plot_node_participation
+from utils.plots import plot_opportunistic_routing_metric, plot_node_participation, plot_intra_prob_delivery
 from inner_functions.path import build_path
 
 
@@ -138,3 +139,43 @@ def remove_outliers(data):
     df_clean = df[(df['values'] >= lower_bound) & (df['values'] <= upper_bound)]
 
     return df_clean['values'].to_numpy().tolist()
+
+
+class IntraMetricAnalysis:
+
+    def __init__(self, report_root, nodes, interval_size):
+        self.report_root = report_root
+        self.nodes = np.array(nodes)
+        self.interval_size = interval_size
+
+    def probabilities(self):
+        list_probs = []
+        files_names = glob.glob(f'{self.report_root}/*DeliveredMessagesReport.txt')
+        for file in files_names:
+            list_probs.append(self.prob_delivery(file))
+        probs = np.array(list_probs)
+        plot_intra_prob_delivery(probs, self.nodes, self.report_root)
+
+
+    def prob_delivery(self, report_file):
+        threshold_time = self.interval_size
+        interval_delivery_count = [0]
+        interval_index = 0
+        with open(report_file, 'r') as report:
+            lines = report.readlines()[1:]
+            for line in lines:
+                split = line.split(' ')
+                time = split[0]
+                if float(time) < threshold_time:
+                    interval_delivery_count[interval_index] += 1
+                else:
+                    interval_delivery_count.append(0)
+                    interval_index += 1
+                    interval_delivery_count[interval_index] += 1
+                    threshold_time += self.interval_size
+        intra_prob_delivery = np.array(interval_delivery_count) / self.nodes
+        print(report_file, intra_prob_delivery)
+        return intra_prob_delivery
+
+
+

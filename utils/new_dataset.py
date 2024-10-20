@@ -56,7 +56,7 @@ class ExportTrace:
 
         initial_x = 100.0
         initial_y = 12000.0
-        initial_increment = 400
+        initial_increment = 2000
         initial_in_line = 0
 
         for index, file_name in enumerate(sorted_files(self.f2_data)):
@@ -106,7 +106,7 @@ inter_record_threshold = 180
 def insert_final_position(df):
     final_x = 100
     final_y = 12000.0
-    final_increment = 400
+    final_increment = 2000
     final_in_line = 0
 
     new_rows = []

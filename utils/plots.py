@@ -471,7 +471,7 @@ def plot_node_participation(participation: dict, report_root: str):
 def plot_intra_prob_delivery(intra_prob_delivery, nodes, path):
     x = np.arange(intra_prob_delivery.shape[1] + 1)
     x_ticks = ['']
-    x_ticks += [f'Interval {i}' for i in range(len(x) - 1)]
+    x_ticks += [i for i in range(len(x) - 1)]
 
     plt.boxplot(intra_prob_delivery)
 
