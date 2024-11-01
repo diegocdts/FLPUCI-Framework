@@ -243,7 +243,7 @@ def plot_time_evolution(curve: list, axis_label: AxisLabel, label: str, line_sty
     means = curve[1]
     upper_bounds = curve[2]
 
-    if len(lower_bounds) > 3 and len(means) > 3 and len(upper_bounds) > 3:
+    if len(lower_bounds) > 0 and len(means) > 0 and len(upper_bounds) > 0:
         fill_between(x_values, lower_bounds, means, upper_bounds, label, kwargs={'ls': line_style})
 
     if final:
