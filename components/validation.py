@@ -10,7 +10,7 @@ from sklearn.mixture import GaussianMixture
 from inner_functions.files import read_json
 from inner_functions.names import sources, column_k, curves
 from inner_functions.path import (build_path, interval_dir, interval_json, metric_interval_json, mkdir,
-                                  get_subdir_list, path_exists, natural_sort_key)
+                                  get_subdir_list, path_exists, natural_sort_key, sorted_list)
 from inner_types.data import Dataset
 from inner_types.learning import LearningApproach, WindowStrategyType
 from inner_types.names import ExportedFiles
@@ -364,6 +364,67 @@ class Validation:
             plot_time_evolution(curve, axis[index], label=sources()[0].capitalize(),
                                 line_style='solid', initial=False, final=True,
                                 path=build_path(self.f9_results_time_evolution, pngs[index].value))
+
+    def time_evolution_2(self, choice_index: int = 2, is_intra: bool = True):
+        f9_base_path = Path.f9_base(self.dataset.name)
+        strategy_paths = []
+        intervals = []
+        for path, dirs, files in os.walk(f9_base_path):
+            if len(path) > 0 and ('/ACC/' in path or '/SLI/' in path) and 'labels for k' not in path:
+                strategy_path = path[:path.index('/interval')]
+                if strategy_path not in strategy_paths:
+                    strategy_paths.append(strategy_path)
+                interval = path[path.index('interval'):]
+                if interval not in intervals:
+                    intervals.append(interval)
+        intervals = sorted_list(intervals)
+
+        axis = [AxisLabel.CONTACT_TIME, AxisLabel.MSE, AxisLabel.SSIM, AxisLabel.ARI]
+        csvs = [ExportedFiles.CONTACT_TIME_CSV, ExportedFiles.MSE_CSV, ExportedFiles.SSIM_CSV, ExportedFiles.ARI_CSV]
+        pngs = [ExportedFiles.CONTACT_TIME_PNG, ExportedFiles.MSE_PNG, ExportedFiles.SSIM_PNG, ExportedFiles.ARI_PNG]
+        index_community = 0 if is_intra else 1
+        type_community = 'Intra community' if is_intra else 'Inter community'
+        styles = ['--', '-.', ]
+
+        for index, file in enumerate(csvs):
+            all_pairs_lowers, all_pairs_means, all_pairs_uppers = [], [], []
+
+            for index_strategy_path, strategy_path in enumerate(strategy_paths):
+                label = strategy_path.replace(f9_base_path, '').replace(f'{LearningApproach.FED}/', '')
+                community_lowers, community_means, community_uppers = [], [], []
+                columns = []
+
+                for interval in intervals:
+                    interval_path = str(os.path.join(strategy_path, interval))
+                    file_path = build_path(interval_path, file.value)
+                    ks_path = build_path(interval_path, ExportedFiles.KS_CHOSEN.value)
+
+                    if path_exists(file_path) and path_exists(ks_path):
+                        ks = np.loadtxt(ks_path, delimiter=',', dtype=int)
+                        k = ks[choice_index]
+
+                        columns.append(f'{column_k(int(k))}|{sources()[1]}')
+                        columns.append(f'{column_k(int(k))}|{sources()[2]}')
+
+                        df = pd.read_csv(file_path, sep=',')
+
+                        if index_strategy_path == 0:
+                            all_pairs_lowers.append(df[sources()[0]].iloc[0])
+                            all_pairs_means.append(df[sources()[0]].iloc[1])
+                            all_pairs_uppers.append(df[sources()[0]].iloc[2])
+
+                        community_lowers.append(df[columns[index_community]].iloc[0])
+                        community_means.append(df[columns[index_community]].iloc[1])
+                        community_uppers.append(df[columns[index_community]].iloc[2])
+
+                curve = [community_lowers, community_means, community_uppers]
+                plot_time_evolution(curve, axis[index], label=f'{label} - {type_community}',
+                                    line_style=styles[index_strategy_path % 2], initial=index_strategy_path == 0)
+            file_name = f'{type_community} - {pngs[index].value}'
+            curve = [all_pairs_lowers, all_pairs_means, all_pairs_uppers]
+            plot_time_evolution(curve, axis[index], label=sources()[0].capitalize(),
+                                line_style='solid', initial=False, final=True,
+                                path=build_path(self.f9_results_time_evolution, file_name))
 
 
 class ValidationHelper:

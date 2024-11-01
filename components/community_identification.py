@@ -71,3 +71,5 @@ class CommunityIdentification:
 
     def time_evolution(self, choice_index):
         self.validation.time_evolution(choice_index)
+        self.validation.time_evolution_2(choice_index, is_intra=True)
+        self.validation.time_evolution_2(choice_index, is_intra=False)
