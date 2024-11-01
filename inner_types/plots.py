@@ -4,6 +4,7 @@ from enum import Enum
 class FigSize(Enum):
     DEFAULT = (5.5, 6.5)
     WIDER = (12.2, 6)
+    WIDER_2 = (14, 6)
     SQUARE = (7.5, 6.5)
     SQUARE_2 = (9.55, 5)
     SMALL = (7, 4)

@@ -30,7 +30,7 @@ def y_tick_2decimal(font_size=FontSize.DEFAULT.value, n_decimal=2):
 
 
 def bspline_plot(x: np.array, y: np.array):
-    x_values = np.linspace(int(x[0]), int(x[-1]), 100)
+    x_values = np.linspace(int(x[0]), int(x[-1]), 300)
     bspline = interpolate.make_interp_spline(x, y, 2)
     y_values = bspline(x_values)
     return x_values, y_values
@@ -236,7 +236,10 @@ def plot_strategy_comparison(all_pairs_mean: float,
 def plot_time_evolution(curve: list, axis_label: AxisLabel, label: str, line_style: str,
                         initial: bool = True, final: bool = False, path: str = None):
     if initial:
-        plt.figure(figsize=FigSize.WIDER.value)
+        if len(curve) > 30:
+            plt.figure(figsize=FigSize.WIDER_2.value)
+        else:
+            plt.figure(figsize=FigSize.WIDER.value)
     x_values = np.arange(0, len(curve[0]))
 
     lower_bounds = curve[0]
@@ -248,13 +251,14 @@ def plot_time_evolution(curve: list, axis_label: AxisLabel, label: str, line_sty
 
     if final:
         y_min, y_max = plt.gca().get_ylim()
+        xticks_step = 1 if len(curve[0]) < 10 else 2
         diff = y_max - y_min
-        plt.ylim(bottom=max(0, y_min), top=y_max + (0.5 * diff))
+        plt.ylim(bottom=max(0, y_min), top=y_max + (0.1 * diff))
         plt.ylabel(axis_label.value, fontsize=FontSize.LARGE.value, weight=FontSize.WEIGHT_SBOLD.value)
         plt.xlabel(AxisLabel.INTERVAL.value, fontsize=FontSize.LARGE.value, weight=FontSize.WEIGHT_SBOLD.value)
-        plt.xticks(np.arange(0, len(curve[0]), 2), fontsize=FontSize.LARGE.value, weight=FontSize.WEIGHT_SBOLD.value)
-        plt.legend(loc=Legend.BEST_LOCATION.value, ncol=Legend.N_COLUMNS_2.value,
-                   prop={'weight': FontSize.WEIGHT_SBOLD.value, 'size': FontSize.DEFAULT.value})
+        plt.xticks(np.arange(0, len(curve[0]), xticks_step), fontsize=FontSize.LARGE.value, weight=FontSize.WEIGHT_SBOLD.value)
+        plt.legend(loc="center left", ncol=Legend.N_COLUMNS_2.value,
+                   prop={'weight': FontSize.WEIGHT_SBOLD.value, 'size': FontSize.DEFAULT.value}, bbox_to_anchor=(0, 1))
 
         y_tick_2decimal(font_size=FontSize.LARGE.value)
 
