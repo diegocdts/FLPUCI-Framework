@@ -11,6 +11,9 @@ def natural_sort_key(text):
 def sorted_files(dir_path: str):
     return sorted(os.listdir(dir_path), key=natural_sort_key)
 
+def sorted_list(_list):
+    return sorted(_list, key=natural_sort_key)
+
 
 def build_path(path_to_dir_or_file: str, dir_or_file_name: str):
     return os.path.join(path_to_dir_or_file, dir_or_file_name)
